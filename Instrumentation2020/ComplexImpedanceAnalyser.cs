@@ -85,8 +85,8 @@ namespace Instrumentation2020
         private void Form1_Load(object sender, EventArgs e)
         {
             // Set initial indexes (and clear display so no clutter)
-            cmbPortName.SelectedIndex = 0;
-            cmbBaudRate.SelectedIndex = 0;
+            portNameBox.SelectedIndex = 0;
+            baudRateBox.SelectedIndex = 0;
             timeoutBox.SelectedIndex = 0;
             rtfTerminal.Clear();
 
@@ -97,7 +97,7 @@ namespace Instrumentation2020
             };
 
             // Set data source
-            cmbPortName.DataSource = ports;
+            portNameBox.DataSource = ports;
 
             // Create a new SerialPort object with default settings.
             _serialPort = new SerialPort();            
@@ -105,14 +105,14 @@ namespace Instrumentation2020
 
         private void changePort()
         {
-            Console.WriteLine(cmbBaudRate);
+            Console.WriteLine(baudRateBox);
             // Make a new serial port object with the new baud rate
-            if (cmbBaudRate.Text != "") {
-                _serialPort = new SerialPort(cmbPortName.Text, Int32.Parse(cmbBaudRate.Text));
+            if (baudRateBox.Text != "") {
+                _serialPort = new SerialPort(portNameBox.Text, Int32.Parse(baudRateBox.Text));
             }
             else
             {
-                _serialPort = new SerialPort(cmbPortName.Text);
+                _serialPort = new SerialPort(portNameBox.Text);
             }
             rtfTerminal.Text += "Set port to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
         }
@@ -214,8 +214,8 @@ namespace Instrumentation2020
         private void resetbutton_Click(object sender, EventArgs e)
         {
             // Reset everything
-            cmbPortName.SelectedIndex = 0;
-            cmbBaudRate.SelectedIndex = 0;
+            portNameBox.SelectedIndex = 0;
+            baudRateBox.SelectedIndex = 0;
             timeoutBox.SelectedIndex = 0;
             rtfTerminal.Clear();
             rtfTerminal.Text += "Settings reset to defaults.\n";

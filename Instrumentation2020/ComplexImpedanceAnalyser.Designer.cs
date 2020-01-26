@@ -31,8 +31,8 @@
             this.gbPortSettings = new System.Windows.Forms.GroupBox();
             this.timeoutBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.cmbPortName = new System.Windows.Forms.ComboBox();
-            this.cmbBaudRate = new System.Windows.Forms.ComboBox();
+            this.portNameBox = new System.Windows.Forms.ComboBox();
+            this.baudRateBox = new System.Windows.Forms.ComboBox();
             this.lblComPort = new System.Windows.Forms.Label();
             this.lblBaudRate = new System.Windows.Forms.Label();
             this.btnClear = new System.Windows.Forms.Button();
@@ -47,8 +47,8 @@
             this.gbPortSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.gbPortSettings.Controls.Add(this.timeoutBox);
             this.gbPortSettings.Controls.Add(this.label1);
-            this.gbPortSettings.Controls.Add(this.cmbPortName);
-            this.gbPortSettings.Controls.Add(this.cmbBaudRate);
+            this.gbPortSettings.Controls.Add(this.portNameBox);
+            this.gbPortSettings.Controls.Add(this.baudRateBox);
             this.gbPortSettings.Controls.Add(this.lblComPort);
             this.gbPortSettings.Controls.Add(this.lblBaudRate);
             this.gbPortSettings.Location = new System.Drawing.Point(12, 175);
@@ -85,28 +85,28 @@
             this.label1.TabIndex = 4;
             this.label1.Text = "Timeout (ms):";
             // 
-            // cmbPortName
+            // portNameBox
             // 
-            this.cmbPortName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbPortName.FormattingEnabled = true;
-            this.cmbPortName.Items.AddRange(new object[] {
+            this.portNameBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.portNameBox.FormattingEnabled = true;
+            this.portNameBox.Items.AddRange(new object[] {
             "COM1",
             "COM2",
             "COM3",
             "COM4",
             "COM5",
             "COM6"});
-            this.cmbPortName.Location = new System.Drawing.Point(13, 35);
-            this.cmbPortName.Name = "cmbPortName";
-            this.cmbPortName.Size = new System.Drawing.Size(67, 21);
-            this.cmbPortName.TabIndex = 1;
-            this.cmbPortName.SelectedIndexChanged += new System.EventHandler(this.cmbPortName_SelectedIndexChanged);
+            this.portNameBox.Location = new System.Drawing.Point(13, 35);
+            this.portNameBox.Name = "portNameBox";
+            this.portNameBox.Size = new System.Drawing.Size(67, 21);
+            this.portNameBox.TabIndex = 1;
+            this.portNameBox.SelectedIndexChanged += new System.EventHandler(this.cmbPortName_SelectedIndexChanged);
             // 
-            // cmbBaudRate
+            // baudRateBox
             // 
-            this.cmbBaudRate.DropDownWidth = 67;
-            this.cmbBaudRate.FormattingEnabled = true;
-            this.cmbBaudRate.Items.AddRange(new object[] {
+            this.baudRateBox.DropDownWidth = 67;
+            this.baudRateBox.FormattingEnabled = true;
+            this.baudRateBox.Items.AddRange(new object[] {
             "1200",
             "2400",
             "4800",
@@ -115,12 +115,12 @@
             "38400",
             "57600",
             "115200"});
-            this.cmbBaudRate.Location = new System.Drawing.Point(86, 35);
-            this.cmbBaudRate.Name = "cmbBaudRate";
-            this.cmbBaudRate.Size = new System.Drawing.Size(69, 21);
-            this.cmbBaudRate.TabIndex = 3;
-            this.cmbBaudRate.SelectedIndexChanged += new System.EventHandler(this.cmbBaudRate_SelectedIndexChanged);
-            this.cmbBaudRate.TextUpdate += new System.EventHandler(this.cmbBaudRate_TextUpdate);
+            this.baudRateBox.Location = new System.Drawing.Point(86, 35);
+            this.baudRateBox.Name = "baudRateBox";
+            this.baudRateBox.Size = new System.Drawing.Size(69, 21);
+            this.baudRateBox.TabIndex = 3;
+            this.baudRateBox.SelectedIndexChanged += new System.EventHandler(this.cmbBaudRate_SelectedIndexChanged);
+            this.baudRateBox.TextUpdate += new System.EventHandler(this.cmbBaudRate_TextUpdate);
             // 
             // lblComPort
             // 
@@ -204,8 +204,8 @@
 
         #endregion
         private System.Windows.Forms.GroupBox gbPortSettings;
-        private System.Windows.Forms.ComboBox cmbPortName;
-        private System.Windows.Forms.ComboBox cmbBaudRate;
+        private System.Windows.Forms.ComboBox portNameBox;
+        private System.Windows.Forms.ComboBox baudRateBox;
         private System.Windows.Forms.Label lblComPort;
         private System.Windows.Forms.Label lblBaudRate;
         private System.Windows.Forms.Button btnClear;
