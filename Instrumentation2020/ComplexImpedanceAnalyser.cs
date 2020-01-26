@@ -27,13 +27,14 @@ namespace Instrumentation2020
             {
                 this.ID = Int32.Parse(message.Substring(2, 2));
                 dataType = this.getDataType(message.Substring(4, 2));
-                data = this.getData(message.Substring(6, 5), dataType);
+                data = this.getData(message.Substring(6, 4), dataType);
                 this.prettyVersion = String.Concat("The ", dataType, " is ", data, ".\n");
             }
             private string getDataType(string data)
             {
                 string dataType = "NULL"; // get rid of once I sort the exception case
 
+                Console.WriteLine(data);
                 switch (data)
                 {
                     case "00":
@@ -44,8 +45,7 @@ namespace Instrumentation2020
                         break;
                     // Add the other cases
                     default:
-                        Console.WriteLine("This shouldn't happen, add an exception here or something.");
-                        break;
+                        throw new Exception("Run out of data types numbers");
                 }
                 return dataType;
             }
@@ -54,18 +54,18 @@ namespace Instrumentation2020
             {
                 string newData = data;
 
+                Console.WriteLine(data, " ", dataType);
                 switch (dataType)
                 {
                     case "Magnitude":
                         newData = String.Concat(data, "Ω");
                         break;
                     case "Phase":
-                        dataType = String.Concat(data, "⌀");
+                        newData = String.Concat(data, "⌀");
                         break;
                     // Add the other cases
                     default:
-                        Console.WriteLine("This shouldn't happen, add another exception here or something.");
-                        break;
+                        throw new Exception("Run out of data types.");
                 }
                 return newData;
             }
@@ -140,10 +140,10 @@ namespace Instrumentation2020
             rtfTerminal.ScrollToCaret();
         }
 
-        private string readSerial(SerialPort port)
+        private string readSerialEvent(SerialPort port)
         {
             string data = "";
-            int numParams = 8;
+            int numParams = 1;
             var done = new Dictionary<int, Message>();
 
             try
@@ -152,7 +152,7 @@ namespace Instrumentation2020
                 // Want all the information, so repeat until you have everything
                 while (done.Count < numParams)
                 {
-                    string serialData = port.ReadLine();
+                    string serialData = port.ReadLine(); // "FF000010002";
                     if (true) { // need to make this a thing that checks the checksum to make sure it is valid
                         // Convert into message form
                         Message msg = new Message(serialData);
@@ -169,8 +169,6 @@ namespace Instrumentation2020
                 {
                     data += message.Value.prettyVersion;
                 }
-
-                return data;
             }
             catch (TimeoutException)
             {
@@ -186,7 +184,7 @@ namespace Instrumentation2020
             _serialPort.Open();
 
             // Try and read the serial port data
-            string message = readSerial(_serialPort);
+            string message = readSerialEvent(_serialPort);
 
             // Write the data and close the port
             rtfTerminal.Text += message + "\n";

@@ -7,3 +7,12 @@ C:\Users\Josh\source\repos\Instrumentation2020\Instrumentation2020\obj\Debug\Ins
 C:\Users\Josh\source\repos\Instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.exe
 C:\Users\Josh\source\repos\Instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.pdb
 C:\Users\Josh\source\repos\Instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.ComplexImpedanceAnalyser.resources
+C:\Users\Josh\instrumentation2020\Instrumentation2020\bin\Debug\Instrumentation2020.exe.config
+C:\Users\Josh\instrumentation2020\Instrumentation2020\bin\Debug\Instrumentation2020.exe
+C:\Users\Josh\instrumentation2020\Instrumentation2020\bin\Debug\Instrumentation2020.pdb
+C:\Users\Josh\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.csprojAssemblyReference.cache
+C:\Users\Josh\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.ComplexImpedanceAnalyser.resources
+C:\Users\Josh\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.Properties.Resources.resources
+C:\Users\Josh\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.csproj.GenerateResource.cache
+C:\Users\Josh\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.exe
+C:\Users\Josh\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.pdb
