@@ -14,6 +14,7 @@ namespace Instrumentation2020
     public partial class ComplexImpedanceAnalyser : Form
     {
         static SerialPort _serialPort;
+        static int numParams = 2;
 
         public class Message
         {
@@ -33,7 +34,6 @@ namespace Instrumentation2020
             {
                 string dataType = "NULL"; // get rid of once I sort the exception case
 
-                Console.WriteLine(data);
                 switch (data)
                 {
                     case "00":
@@ -53,7 +53,6 @@ namespace Instrumentation2020
             {
                 string newData = data;
 
-                Console.WriteLine(data, " ", dataType);
                 switch (dataType)
                 {
                     case "Magnitude":
@@ -142,14 +141,15 @@ namespace Instrumentation2020
         private string readSerialEvent(SerialPort port)
         {
             string data = "";
-            int numParams = 1;
             var done = new Dictionary<int, Message>();
 
             try
             {
+                var startTime = DateTime.UtcNow;
+                var timeout = TimeSpan.FromMilliseconds(Convert.ToDouble(timeoutBox.Text)); // Calculate once for efficiency
                 // Assuming data is a 12 byte string |FF|id|datatype|data|checksum|                
-                // Want all the information, so repeat until you have everything
-                while (done.Count < numParams)
+                // Want all the information, so repeat until you have everything or you timeout
+                while (done.Count < numParams && DateTime.UtcNow - startTime < timeout) // Make sure it times out
                 {
                     string serialData = port.ReadLine(); // "FF000010002";
                     if (true) { // need to make this a thing that checks the checksum to make sure it is valid
@@ -163,6 +163,11 @@ namespace Instrumentation2020
                     }
                 }
 
+                if (DateTime.UtcNow - startTime > timeout)
+                {
+                    data += _serialPort.PortName + " timed out but returned the following data:\n";
+                }
+
                 // Make it pretty
                 foreach (KeyValuePair<int, Message> message in done)
                 {
@@ -171,7 +176,7 @@ namespace Instrumentation2020
             }
             catch (TimeoutException)
             {
-                data = _serialPort.PortName + " timed out.";
+                data = _serialPort.PortName + " timed out and returned no data.";
             }
             return data;
         }
