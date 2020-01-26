@@ -14,7 +14,6 @@ namespace Instrumentation2020
     public partial class ComplexImpedanceAnalyser : Form
     {
         static SerialPort _serialPort;
-        int readTimeout = 1000;
 
         public class Message
         {
@@ -180,7 +179,7 @@ namespace Instrumentation2020
         private void Measure_Click(object sender, EventArgs e)
         {
             // Set the timeout and open the port
-            _serialPort.ReadTimeout = readTimeout;
+            _serialPort.ReadTimeout = Int32.Parse(timeoutBox.Text); ;
             _serialPort.Open();
 
             // Try and read the serial port data
@@ -194,8 +193,7 @@ namespace Instrumentation2020
         private void changeTimeOut()
         {
             // Read and set timeout data
-            readTimeout = Int32.Parse(timeoutBox.Text);
-            rtfTerminal.Text += "Port timeout set to " + readTimeout + "ms.\n";
+            rtfTerminal.Text += "Port timeout set to " + timeoutBox.Text + "ms.\n";
         }
 
         private void timeoutBox_SelectedIndexChanged(object sender, EventArgs e)
