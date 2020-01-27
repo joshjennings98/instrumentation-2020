@@ -14,52 +14,60 @@ namespace Instrumentation2020
     public partial class ComplexImpedanceAnalyser : Form
     {
         static SerialPort _serialPort;
+        static bool _serialDataRxFlag;
+        static byte[] _serialRxBuffer;
         static int numParams = 2;
 
         public class Message
         {
-            public int ID;
-            private string dataType;
+            public byte ID;
             private string data;
+            public string messageType;
             public string prettyVersion;
 
-            public Message(string message)
+            public Message(byte[] message)
             {
-                this.ID = Int32.Parse(message.Substring(2, 2));
-                dataType = this.getDataType(message.Substring(4, 2));
-                data = this.getData(message.Substring(6, 4), dataType);
-                this.prettyVersion = String.Concat("The ", dataType, " is ", data, ".\n");
+                this.ID = message[1];
+                messageType = this.getMessageType(ID);
+                data = this.getData(message, ID);
+                this.prettyVersion = String.Concat("The ", messageType, " is ", data, ".\n");
             }
-            private string getDataType(string data)
+            private string getMessageType(byte data)
             {
                 string dataType = "NULL"; // get rid of once I sort the exception case
 
                 switch (data)
                 {
-                    case "00":
-                        dataType = "Magnitude";
+                    case 0x00:
+                        dataType = "Not Assigned";
                         break;
-                    case "01":
-                        dataType = "Phase";
+                    case 0x01:
+                        dataType = "Status";
                         break;
                     // Add the other cases
                     default:
-                        throw new Exception("Run out of data types numbers");
+                        throw new Exception("Data ID not assigned");
                 }
                 return dataType;
             }
 
-            private string getData(string data, string dataType)
+            private string getData(byte[] message, byte ID)
             {
                 string newData = data;
 
-                switch (dataType)
+                switch (ID)
                 {
-                    case "Magnitude":
+                    case 0x00:
                         newData = String.Concat(data, "Ω");
                         break;
-                    case "Phase":
-                        newData = String.Concat(data, "⌀");
+                    case 0x01:
+                        // Status Message, Extract Sys Count
+                        UInt32 count = 0;
+                        count |= (UInt32)(message[2] << 24);
+                        count |= (UInt32)(message[3] << 16);
+                        count |= (UInt32)(message[4] << 8);
+                        count |= (UInt32)(message[5] << 4);
+                        newData = count.ToString();
                         break;
                     // Add the other cases
                     default:
@@ -138,7 +146,7 @@ namespace Instrumentation2020
             rtfTerminal.ScrollToCaret();
         }
 
-        private string readSerialEvent(SerialPort port)
+        private string readSerialEvent()
         {
             string data = "";
             var done = new Dictionary<int, Message>();
@@ -151,15 +159,16 @@ namespace Instrumentation2020
                 // Want all the information, so repeat until you have everything or you timeout
                 while (done.Count < numParams && DateTime.UtcNow - startTime < timeout) // Make sure it times out
                 {
-                    string serialData = port.ReadLine(); // "FF000010002";
-                    if (true) { // need to make this a thing that checks the checksum to make sure it is valid
+                    if (_serialDataRxFlag) { // If Data has been recieved
                         // Convert into message form
-                        Message msg = new Message(serialData);
+                        Message msg = new Message(_serialRxBuffer);
                         
                         // Only add it to map if it isn't already in there
                         if (!done.ContainsKey(msg.ID)) {
                             done.Add(msg.ID, msg);
                         }
+
+                        _serialDataRxFlag = false;
                     }
                 }
 
@@ -185,14 +194,11 @@ namespace Instrumentation2020
         {
             // Set the timeout and open the port
             _serialPort.ReadTimeout = Int32.Parse(timeoutBox.Text); ;
-            _serialPort.Open();
-
             // Try and read the serial port data
-            string message = readSerialEvent(_serialPort);
+            string message = readSerialEvent();
 
             // Write the data and close the port
             rtfTerminal.Text += message + "\n";
-            _serialPort.Close();
         }
 
         private void changeTimeOut()
@@ -219,6 +225,42 @@ namespace Instrumentation2020
             timeoutBox.SelectedIndex = 0;
             rtfTerminal.Clear();
             rtfTerminal.Text += "Settings reset to defaults.\n";
+        }
+
+        private void ConnectBtn_Click(object sender, EventArgs e)
+        {
+            _serialDataRxFlag = false;
+            _serialPort.Open();
+            _serialPort.ReceivedBytesThreshold = 1;
+            _serialPort.DataReceived += _serialPort_DataReceived;
+        }
+
+        private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            byte header = (byte)_serialPort.ReadByte();
+
+            if (header == 0xFF)
+            {
+                byte[] buffer = new byte[12];
+
+                buffer[0] = 0xFF;
+
+                for (int i = 1; i < 12; i++)
+                {
+                    buffer[i] = (byte)_serialPort.ReadByte();
+                }
+
+                // Calculate Checksum and Check Data is Valid
+
+                // Copy Data to Global Buffer
+                _serialRxBuffer = buffer;
+                // Set a message recieved flag
+                _serialDataRxFlag = true;
+            }
+
+            else {
+                _serialPort.DiscardInBuffer();
+            };
         }
     }
 }
