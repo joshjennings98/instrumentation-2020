@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "string.h"
+#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,16 +44,23 @@
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
-uint16_t registerValues[5];
+uint16_t registerValues[5]; // Buffer to store calculated SPI Tx to transmit to ad9833
+uint8_t uartRxBytes[12]; // Buffer to store Recieved UART bytes
+bool updateSignalFreqFlag = false; // Flag to request AD9833 frequency update
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+void UART_Rx_Handler(void);
+void AD9833_Set_Output(void);
+bool CalculateRxDataChecksum(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -90,8 +98,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  // Reset AD9833
+  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+  HAL_Delay(10);
+  uint16_t resetValue = 0x100;
+  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi1, (uint8_t*)resetValue, sizeof(resetValue)/sizeof(uint16_t), HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
 
+  // UART interrupts
+  HAL_UART_Receive_IT(&huart2, (uint8_t*)uartRxBytes, 12);
+  //HAL_UART_Receive_DMA(&huart2, (uint8_t*)uartRxBytes, 1);
   /* USER CODE END 2 */
  
  
@@ -103,24 +122,20 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  // Calculate Values to Send to AD9833
-	  AD9833CalculateRegister(1000, 0x2000);
 
-	  // Send Data Packets
-	  uint16_t size = 1;
-	  uint8_t * base = (uint8_t*)registerValues;
-	  uint8_t * dataPointer = (uint8_t*)registerValues;
-	  while(dataPointer < base + sizeof(registerValues))
-	  {
-		  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
-		  HAL_SPI_Transmit(&hspi1, dataPointer, size, HAL_MAX_DELAY);
-		  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
-		  dataPointer += sizeof(uint16_t);
+
+
+	  // Send Data Packets to AD9833
+	  if(updateSignalFreqFlag == true){
+		  AD9833_Set_Output();
+		  updateSignalFreqFlag = false;
 	  }
+
 
 	  // Toggle LED pin to show we're alive
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 
+	  // Arbitrary Loop Delay To stop spamming everything
 	  HAL_Delay(1000);
 
   }
@@ -185,10 +200,10 @@ static void MX_SPI1_Init(void)
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
   hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -200,6 +215,39 @@ static void MX_SPI1_Init(void)
   /* USER CODE BEGIN SPI1_Init 2 */
 
   /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -240,6 +288,77 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	// Handle Recieved Message
+	UART_Rx_Handler();
+
+	// Stage Rx of Next UART Message
+	HAL_UART_Receive_IT(&huart2, (uint8_t*)uartRxBytes, 12);
+}
+
+void UART_Rx_Handler(void)
+{
+	// TODO implement Error Checking.
+
+	if(uartRxBytes[0] != 0xFF) 	// If header byte is not first byte abandon
+		return;
+
+	//Calculate Checksum to Check Data is Valid
+	if(!CalculateRxDataChecksum())
+		return;
+
+	// Data is valid so handle it
+
+	int freq = 0;
+	// Switch on Data ID
+	switch(uartRxBytes[1])
+	{
+	case(0x00):
+			break;
+	case(0x01):
+			break;
+	case(0x02):
+			break;
+	case(0x04): // frequency change message
+			freq = uartRxBytes[6] | ( (int)uartRxBytes[5] << 8 ) | ( (int)uartRxBytes[4] << 16 ) | ( (int)uartRxBytes[3] << 24 );
+			AD9833CalculateRegister(freq, 0x2000);
+			// Set Update Frequency Flag so AD9833 updates in main task loop
+			updateSignalFreqFlag = true;
+			break;
+	default:
+		break;
+	}
+}
+
+bool CalculateRxDataChecksum(void)
+{
+	uint8_t result = 0;
+
+	int i;
+	// Checksum is bitwise xor of all bytes except checksum
+	for(i = 0; i < (sizeof(uartRxBytes)/sizeof(uint8_t) - 1); i++)
+		result = result ^ uartRxBytes[i];
+
+	if(result == uartRxBytes[i])
+		return true;
+	else
+		return false;
+}
+
+void AD9833_Set_Output(void)
+{
+	uint16_t size = 1;
+	uint8_t * base = (uint8_t*)registerValues;
+	uint8_t * dataPointer = (uint8_t*)registerValues;
+	while(dataPointer < base + sizeof(registerValues))
+	{
+		HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
+		HAL_SPI_Transmit(&hspi1, dataPointer, size, HAL_MAX_DELAY);
+		HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+		dataPointer += sizeof(uint16_t);
+	}
+}
 /* USER CODE END 4 */
 
 /**
