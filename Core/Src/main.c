@@ -103,16 +103,22 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  // Calculate Values to Send to AD9833
 	  AD9833CalculateRegister(1000, 0x2000);
 
+	  // Send Data Packets
+	  uint16_t size = 1;
+	  uint8_t * base = (uint8_t*)registerValues;
+	  uint8_t * dataPointer = (uint8_t*)registerValues;
+	  while(dataPointer < base + sizeof(registerValues))
+	  {
+		  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
+		  HAL_SPI_Transmit(&hspi1, dataPointer, size, HAL_MAX_DELAY);
+		  HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+		  dataPointer += sizeof(uint16_t);
+	  }
 
-
-	  char message[] = "Hello, World";
-	  //uint16_t size = strlen(message);
-	  uint16_t size = sizeof(registerValues)/sizeof(uint16_t);
-	  //HAL_SPI_Transmit(&hspi1, (uint8_t *)message, strlen(message), HAL_MAX_DELAY);
-	  HAL_SPI_Transmit(&hspi1, (uint8_t*)registerValues, size, HAL_MAX_DELAY);
-
+	  // Toggle LED pin to show we're alive
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 
 	  HAL_Delay(1000);
@@ -182,7 +188,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
