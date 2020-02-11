@@ -98,9 +98,10 @@ namespace Instrumentation2020
         {
             // Set initial indexes (and clear display so no clutter)
             portNameBox.SelectedIndex = 0;
-            baudRateBox.SelectedIndex = 0;
+            baudRateBox.SelectedIndex = 7;
             timeoutBox.SelectedIndex = 0;
             waveformbox.SelectedIndex = 0;
+
             rtfTerminal.Clear();
 
             // Get list of ports available and put into list
@@ -133,7 +134,6 @@ namespace Instrumentation2020
             {
                 _serialPort = new SerialPort(portNameBox.Text);
             }
-            rtfTerminal.Text += "Set port to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
         }
 
         private byte[] checksum(byte[] data)
@@ -184,8 +184,8 @@ namespace Instrumentation2020
             byte[] data = CombineByteArrays(new [] { id, frequency, waveform});//"FF0408" + frequency + waveform;
             byte[] message = CombineByteArrays(new[] { data, checksum(data) });
 
-            string x = BitConverter.ToString(message);
-            rtfTerminal.Text += "Sending message: " + x + "\n";
+            //string x = BitConverter.ToString(message);
+            //rtfTerminal.Text += "Sending message: " + x + "\n";
 
             return message;
         }
@@ -240,7 +240,14 @@ namespace Instrumentation2020
 
                 if (DateTime.UtcNow - startTime > timeout)
                 {
-                    data += _serialPort.PortName + " timed out but returned the following data:\n";
+                    if (done.Count != 0)
+                    {
+                        data += _serialPort.PortName + " timed out but returned the following data:\n";
+                    } 
+                    else
+                    {
+                        data = _serialPort.PortName + " timed out and returned no data.";
+                    }
                 }
 
                 // Make it pretty
@@ -287,7 +294,7 @@ namespace Instrumentation2020
         {
             // Reset everything
             rtfTerminal.Clear();
-            rtfTerminal.Text += "Settings reset to defaults.\n";
+            rtfTerminal.Text += "Settings reset to defaults:\n";
 
             if (!noCOMsFlag)
             {
@@ -296,9 +303,13 @@ namespace Instrumentation2020
             {
                 rtfTerminal.Text += "No COM ports available.\n";
             }
-            baudRateBox.SelectedIndex = 0;
+            //baudRateBox.SelectedIndex = 7;
             timeoutBox.SelectedIndex = 0;
-        }
+            currentFreq = 1000;
+            currentWaveform = "Sinewave";
+            waveformbox.SelectedIndex = 0;
+            setFrequency(false);
+    }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
@@ -309,7 +320,13 @@ namespace Instrumentation2020
                 _serialPort.Open();
                 _serialPort.ReceivedBytesThreshold = 1;
                 _serialPort.DataReceived += _serialPort_DataReceived;
-            } else
+                baudRateBox.Enabled = false;
+                Measure.Enabled = true;
+
+                rtfTerminal.Clear();
+                rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
+            }
+            else
             {
                 rtfTerminal.Text += "Cannot connect, no COM ports available.\n";
             }
@@ -351,13 +368,14 @@ namespace Instrumentation2020
             }
         }
 
-        private void freqencySetButton_Click(object sender, EventArgs e)
+        private void setFrequency(bool useField = true)
         {
             int i = 0;
-            if (freqInput.Text != "" && int.TryParse(freqInput.Text, out i) && i < 0xFFFFFFF) {
+            if ((freqInput.Text != "" && int.TryParse(freqInput.Text, out i) && i < 0xFFFFFFF) || useField == false)
+            {
                 if (_serialPort.IsOpen)
                 {
-                    rtfTerminal.Text += "Set frequency to a " + currentFreq + "Hz " + currentWaveform + ".\n";
+                    rtfTerminal.Text += "Frequency set to a " + currentFreq + "Hz " + currentWaveform + ".\n";
                     freqInput.Text = "";
                     byte[] message = formFreqMessage();
                     try
@@ -390,6 +408,11 @@ namespace Instrumentation2020
             {
                 rtfTerminal.Text += "Invalid input.\n";
             }
+        }
+
+        private void freqencySetButton_Click(object sender, EventArgs e)
+        {
+            setFrequency();
         }
 
         private void waveformbox_SelectedIndexChanged(object sender, EventArgs e)
