@@ -322,6 +322,11 @@ namespace Instrumentation2020
                 _serialPort.DataReceived += _serialPort_DataReceived;
                 baudRateBox.Enabled = false;
                 Measure.Enabled = true;
+                ConnectBtn.Enabled = false;
+                ConnectBtn.Visible = false;
+                DisconnectButton.Enabled = true;
+                DisconnectButton.Visible = true;
+                portNameBox.Enabled = false;
 
                 rtfTerminal.Clear();
                 rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
@@ -418,6 +423,23 @@ namespace Instrumentation2020
         private void waveformbox_SelectedIndexChanged(object sender, EventArgs e)
         {
             currentWaveform = waveformbox.Text;
+        }
+
+        private void disconnectSerialStuff()
+        {
+            baudRateBox.Enabled = true;
+            Measure.Enabled = false;
+            ConnectBtn.Enabled = true;
+            ConnectBtn.Visible = true;
+            DisconnectButton.Enabled = false;
+            DisconnectButton.Visible = false;
+            portNameBox.Enabled = true;
+            _serialPort.Close();
+        }
+
+        private void DisconnectButton_Click(object sender, EventArgs e)
+        {
+            disconnectSerialStuff();
         }
     }
 }

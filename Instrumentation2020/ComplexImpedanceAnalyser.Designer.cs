@@ -37,6 +37,7 @@
             this.ConnectBtn = new System.Windows.Forms.Button();
             this.freqInput = new System.Windows.Forms.TextBox();
             this.Measure = new System.Windows.Forms.Button();
+            this.resetbutton = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.timeoutBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -46,13 +47,14 @@
             this.lblBaudRate = new System.Windows.Forms.Label();
             this.rtfTerminal = new System.Windows.Forms.RichTextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.resetbutton = new System.Windows.Forms.Button();
+            this.DisconnectButton = new System.Windows.Forms.Button();
             this.gbPortSettings.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbPortSettings
             // 
             this.gbPortSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.gbPortSettings.Controls.Add(this.DisconnectButton);
             this.gbPortSettings.Controls.Add(this.waveformbox);
             this.gbPortSettings.Controls.Add(this.label2);
             this.gbPortSettings.Controls.Add(this.freqencySetButton);
@@ -103,7 +105,7 @@
             // freqencySetButton
             // 
             this.freqencySetButton.Location = new System.Drawing.Point(264, 74);
-            this.freqencySetButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.freqencySetButton.Margin = new System.Windows.Forms.Padding(2);
             this.freqencySetButton.Name = "freqencySetButton";
             this.freqencySetButton.Size = new System.Drawing.Size(67, 20);
             this.freqencySetButton.TabIndex = 16;
@@ -124,7 +126,7 @@
             // ConnectBtn
             // 
             this.ConnectBtn.Location = new System.Drawing.Point(88, 33);
-            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(2);
             this.ConnectBtn.Name = "ConnectBtn";
             this.ConnectBtn.Size = new System.Drawing.Size(73, 21);
             this.ConnectBtn.TabIndex = 14;
@@ -135,7 +137,7 @@
             // freqInput
             // 
             this.freqInput.Location = new System.Drawing.Point(13, 74);
-            this.freqInput.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.freqInput.Margin = new System.Windows.Forms.Padding(2);
             this.freqInput.Name = "freqInput";
             this.freqInput.Size = new System.Drawing.Size(140, 20);
             this.freqInput.TabIndex = 15;
@@ -152,6 +154,16 @@
             this.Measure.Text = "&Measure";
             this.Measure.UseVisualStyleBackColor = true;
             this.Measure.Click += new System.EventHandler(this.Measure_Click);
+            // 
+            // resetbutton
+            // 
+            this.resetbutton.Location = new System.Drawing.Point(176, 104);
+            this.resetbutton.Name = "resetbutton";
+            this.resetbutton.Size = new System.Drawing.Size(72, 23);
+            this.resetbutton.TabIndex = 13;
+            this.resetbutton.Text = "Reset";
+            this.resetbutton.UseVisualStyleBackColor = true;
+            this.resetbutton.Click += new System.EventHandler(this.resetbutton_Click);
             // 
             // btnClear
             // 
@@ -263,15 +275,18 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // resetbutton
+            // DisconnectButton
             // 
-            this.resetbutton.Location = new System.Drawing.Point(176, 104);
-            this.resetbutton.Name = "resetbutton";
-            this.resetbutton.Size = new System.Drawing.Size(72, 23);
-            this.resetbutton.TabIndex = 13;
-            this.resetbutton.Text = "Reset";
-            this.resetbutton.UseVisualStyleBackColor = true;
-            this.resetbutton.Click += new System.EventHandler(this.resetbutton_Click);
+            this.DisconnectButton.Enabled = false;
+            this.DisconnectButton.Location = new System.Drawing.Point(88, 33);
+            this.DisconnectButton.Margin = new System.Windows.Forms.Padding(2);
+            this.DisconnectButton.Name = "DisconnectButton";
+            this.DisconnectButton.Size = new System.Drawing.Size(73, 21);
+            this.DisconnectButton.TabIndex = 19;
+            this.DisconnectButton.Text = "Disconnect";
+            this.DisconnectButton.UseVisualStyleBackColor = true;
+            this.DisconnectButton.Visible = false;
+            this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
             // 
             // ComplexImpedanceAnalyser
             // 
@@ -308,6 +323,7 @@
         private System.Windows.Forms.ComboBox waveformbox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button resetbutton;
+        private System.Windows.Forms.Button DisconnectButton;
     }
 }
 
