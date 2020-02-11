@@ -28,54 +28,141 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.gbPortSettings = new System.Windows.Forms.GroupBox();
+            this.freqencySetButton = new System.Windows.Forms.Button();
+            this.freqLabel = new System.Windows.Forms.Label();
+            this.ConnectBtn = new System.Windows.Forms.Button();
+            this.freqInput = new System.Windows.Forms.TextBox();
+            this.Measure = new System.Windows.Forms.Button();
+            this.resetbutton = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
             this.timeoutBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.portNameBox = new System.Windows.Forms.ComboBox();
             this.baudRateBox = new System.Windows.Forms.ComboBox();
             this.lblComPort = new System.Windows.Forms.Label();
             this.lblBaudRate = new System.Windows.Forms.Label();
-            this.btnClear = new System.Windows.Forms.Button();
             this.rtfTerminal = new System.Windows.Forms.RichTextBox();
-            this.Measure = new System.Windows.Forms.Button();
-            this.resetbutton = new System.Windows.Forms.Button();
-            this.ConnectBtn = new System.Windows.Forms.Button();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.waveformbox = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.gbPortSettings.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbPortSettings
             // 
             this.gbPortSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.gbPortSettings.Controls.Add(this.waveformbox);
+            this.gbPortSettings.Controls.Add(this.label2);
+            this.gbPortSettings.Controls.Add(this.freqencySetButton);
+            this.gbPortSettings.Controls.Add(this.freqLabel);
+            this.gbPortSettings.Controls.Add(this.ConnectBtn);
+            this.gbPortSettings.Controls.Add(this.freqInput);
+            this.gbPortSettings.Controls.Add(this.Measure);
+            this.gbPortSettings.Controls.Add(this.resetbutton);
+            this.gbPortSettings.Controls.Add(this.btnClear);
             this.gbPortSettings.Controls.Add(this.timeoutBox);
             this.gbPortSettings.Controls.Add(this.label1);
             this.gbPortSettings.Controls.Add(this.portNameBox);
             this.gbPortSettings.Controls.Add(this.baudRateBox);
             this.gbPortSettings.Controls.Add(this.lblComPort);
             this.gbPortSettings.Controls.Add(this.lblBaudRate);
-            this.gbPortSettings.Location = new System.Drawing.Point(28, 356);
-            this.gbPortSettings.Margin = new System.Windows.Forms.Padding(7);
+            this.gbPortSettings.Location = new System.Drawing.Point(24, 276);
+            this.gbPortSettings.Margin = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Name = "gbPortSettings";
-            this.gbPortSettings.Padding = new System.Windows.Forms.Padding(7);
-            this.gbPortSettings.Size = new System.Drawing.Size(565, 198);
+            this.gbPortSettings.Padding = new System.Windows.Forms.Padding(6);
+            this.gbPortSettings.Size = new System.Drawing.Size(674, 256);
             this.gbPortSettings.TabIndex = 5;
             this.gbPortSettings.TabStop = false;
             this.gbPortSettings.Text = "COM Serial Port Settings";
+            // 
+            // freqencySetButton
+            // 
+            this.freqencySetButton.Location = new System.Drawing.Point(528, 143);
+            this.freqencySetButton.Name = "freqencySetButton";
+            this.freqencySetButton.Size = new System.Drawing.Size(134, 39);
+            this.freqencySetButton.TabIndex = 16;
+            this.freqencySetButton.Text = "Set";
+            this.freqencySetButton.UseVisualStyleBackColor = true;
+            this.freqencySetButton.Click += new System.EventHandler(this.freqencySetButton_Click);
+            // 
+            // freqLabel
+            // 
+            this.freqLabel.AutoSize = true;
+            this.freqLabel.Location = new System.Drawing.Point(24, 115);
+            this.freqLabel.Name = "freqLabel";
+            this.freqLabel.Size = new System.Drawing.Size(166, 25);
+            this.freqLabel.TabIndex = 13;
+            this.freqLabel.Text = "Frequency (Hz):";
+            // 
+            // ConnectBtn
+            // 
+            this.ConnectBtn.Location = new System.Drawing.Point(175, 64);
+            this.ConnectBtn.Name = "ConnectBtn";
+            this.ConnectBtn.Size = new System.Drawing.Size(146, 40);
+            this.ConnectBtn.TabIndex = 14;
+            this.ConnectBtn.Text = "Connect";
+            this.ConnectBtn.UseVisualStyleBackColor = true;
+            this.ConnectBtn.Click += new System.EventHandler(this.ConnectBtn_Click);
+            // 
+            // freqInput
+            // 
+            this.freqInput.Location = new System.Drawing.Point(26, 143);
+            this.freqInput.Name = "freqInput";
+            this.freqInput.Size = new System.Drawing.Size(276, 31);
+            this.freqInput.TabIndex = 15;
+            this.freqInput.TextChanged += new System.EventHandler(this.freqInput_TextChanged);
+            // 
+            // Measure
+            // 
+            this.Measure.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Measure.Location = new System.Drawing.Point(23, 200);
+            this.Measure.Margin = new System.Windows.Forms.Padding(6);
+            this.Measure.Name = "Measure";
+            this.Measure.Size = new System.Drawing.Size(298, 44);
+            this.Measure.TabIndex = 12;
+            this.Measure.Text = "&Measure";
+            this.Measure.UseVisualStyleBackColor = true;
+            this.Measure.Click += new System.EventHandler(this.Measure_Click);
+            // 
+            // resetbutton
+            // 
+            this.resetbutton.Location = new System.Drawing.Point(351, 200);
+            this.resetbutton.Margin = new System.Windows.Forms.Padding(6);
+            this.resetbutton.Name = "resetbutton";
+            this.resetbutton.Size = new System.Drawing.Size(144, 44);
+            this.resetbutton.TabIndex = 13;
+            this.resetbutton.Text = "Reset";
+            this.resetbutton.UseVisualStyleBackColor = true;
+            this.resetbutton.Click += new System.EventHandler(this.resetbutton_Click);
+            // 
+            // btnClear
+            // 
+            this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClear.Location = new System.Drawing.Point(528, 200);
+            this.btnClear.Margin = new System.Windows.Forms.Padding(6);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(134, 44);
+            this.btnClear.TabIndex = 10;
+            this.btnClear.Text = "&Clear";
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // timeoutBox
             // 
             this.timeoutBox.DropDownWidth = 67;
             this.timeoutBox.FormattingEnabled = true;
-            this.timeoutBox.ItemHeight = 29;
+            this.timeoutBox.ItemHeight = 25;
             this.timeoutBox.Items.AddRange(new object[] {
             "1000",
             "2000",
             "5000",
             "7000",
             "10000"});
-            this.timeoutBox.Location = new System.Drawing.Point(376, 78);
-            this.timeoutBox.Margin = new System.Windows.Forms.Padding(7);
+            this.timeoutBox.Location = new System.Drawing.Point(359, 64);
+            this.timeoutBox.Margin = new System.Windows.Forms.Padding(6);
             this.timeoutBox.Name = "timeoutBox";
-            this.timeoutBox.Size = new System.Drawing.Size(156, 37);
+            this.timeoutBox.Size = new System.Drawing.Size(134, 33);
             this.timeoutBox.TabIndex = 5;
             this.timeoutBox.SelectedIndexChanged += new System.EventHandler(this.timeoutBox_SelectedIndexChanged);
             this.timeoutBox.TextUpdate += new System.EventHandler(this.timeoutBox_TextUpdate);
@@ -83,10 +170,10 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(373, 42);
-            this.label1.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.label1.Location = new System.Drawing.Point(350, 33);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(162, 29);
+            this.label1.Size = new System.Drawing.Size(143, 25);
             this.label1.TabIndex = 4;
             this.label1.Text = "Timeout (ms):";
             // 
@@ -101,10 +188,10 @@
             "COM4",
             "COM5",
             "COM6"});
-            this.portNameBox.Location = new System.Drawing.Point(30, 78);
-            this.portNameBox.Margin = new System.Windows.Forms.Padding(7);
+            this.portNameBox.Location = new System.Drawing.Point(26, 64);
+            this.portNameBox.Margin = new System.Windows.Forms.Padding(6);
             this.portNameBox.Name = "portNameBox";
-            this.portNameBox.Size = new System.Drawing.Size(151, 37);
+            this.portNameBox.Size = new System.Drawing.Size(130, 33);
             this.portNameBox.TabIndex = 1;
             this.portNameBox.SelectedIndexChanged += new System.EventHandler(this.cmbPortName_SelectedIndexChanged);
             // 
@@ -121,10 +208,10 @@
             "38400",
             "57600",
             "115200"});
-            this.baudRateBox.Location = new System.Drawing.Point(201, 78);
-            this.baudRateBox.Margin = new System.Windows.Forms.Padding(7);
+            this.baudRateBox.Location = new System.Drawing.Point(528, 64);
+            this.baudRateBox.Margin = new System.Windows.Forms.Padding(6);
             this.baudRateBox.Name = "baudRateBox";
-            this.baudRateBox.Size = new System.Drawing.Size(156, 37);
+            this.baudRateBox.Size = new System.Drawing.Size(134, 33);
             this.baudRateBox.TabIndex = 3;
             this.baudRateBox.SelectedIndexChanged += new System.EventHandler(this.cmbBaudRate_SelectedIndexChanged);
             this.baudRateBox.TextUpdate += new System.EventHandler(this.cmbBaudRate_TextUpdate);
@@ -132,94 +219,79 @@
             // lblComPort
             // 
             this.lblComPort.AutoSize = true;
-            this.lblComPort.Location = new System.Drawing.Point(28, 42);
-            this.lblComPort.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.lblComPort.Location = new System.Drawing.Point(24, 33);
+            this.lblComPort.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblComPort.Name = "lblComPort";
-            this.lblComPort.Size = new System.Drawing.Size(125, 29);
+            this.lblComPort.Size = new System.Drawing.Size(112, 25);
             this.lblComPort.TabIndex = 0;
             this.lblComPort.Text = "COM Port:";
             // 
             // lblBaudRate
             // 
             this.lblBaudRate.AutoSize = true;
-            this.lblBaudRate.Location = new System.Drawing.Point(198, 42);
-            this.lblBaudRate.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.lblBaudRate.Location = new System.Drawing.Point(523, 35);
+            this.lblBaudRate.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblBaudRate.Name = "lblBaudRate";
-            this.lblBaudRate.Size = new System.Drawing.Size(131, 29);
+            this.lblBaudRate.Size = new System.Drawing.Size(119, 25);
             this.lblBaudRate.TabIndex = 2;
             this.lblBaudRate.Text = "Baud Rate:";
-            // 
-            // btnClear
-            // 
-            this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClear.Location = new System.Drawing.Point(618, 369);
-            this.btnClear.Margin = new System.Windows.Forms.Padding(7);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(175, 51);
-            this.btnClear.TabIndex = 10;
-            this.btnClear.Text = "&Clear";
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // rtfTerminal
             // 
             this.rtfTerminal.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.rtfTerminal.Location = new System.Drawing.Point(28, 27);
-            this.rtfTerminal.Margin = new System.Windows.Forms.Padding(7);
+            this.rtfTerminal.Location = new System.Drawing.Point(24, 15);
+            this.rtfTerminal.Margin = new System.Windows.Forms.Padding(6);
             this.rtfTerminal.Name = "rtfTerminal";
-            this.rtfTerminal.Size = new System.Drawing.Size(767, 324);
+            this.rtfTerminal.Size = new System.Drawing.Size(671, 249);
             this.rtfTerminal.TabIndex = 11;
             this.rtfTerminal.Text = "";
             this.rtfTerminal.TextChanged += new System.EventHandler(this.rtfTerminal_TextChanged);
             // 
-            // Measure
+            // contextMenuStrip1
             // 
-            this.Measure.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Measure.Location = new System.Drawing.Point(616, 495);
-            this.Measure.Margin = new System.Windows.Forms.Padding(7);
-            this.Measure.Name = "Measure";
-            this.Measure.Size = new System.Drawing.Size(175, 51);
-            this.Measure.TabIndex = 12;
-            this.Measure.Text = "&Measure";
-            this.Measure.UseVisualStyleBackColor = true;
-            this.Measure.Click += new System.EventHandler(this.Measure_Click);
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // resetbutton
+            // waveformbox
             // 
-            this.resetbutton.Location = new System.Drawing.Point(616, 431);
-            this.resetbutton.Margin = new System.Windows.Forms.Padding(7);
-            this.resetbutton.Name = "resetbutton";
-            this.resetbutton.Size = new System.Drawing.Size(175, 51);
-            this.resetbutton.TabIndex = 13;
-            this.resetbutton.Text = "Reset";
-            this.resetbutton.UseVisualStyleBackColor = true;
-            this.resetbutton.Click += new System.EventHandler(this.resetbutton_Click);
+            this.waveformbox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.waveformbox.DropDownWidth = 67;
+            this.waveformbox.FormattingEnabled = true;
+            this.waveformbox.ItemHeight = 25;
+            this.waveformbox.Items.AddRange(new object[] {
+            "Sine wave",
+            "Square wave",
+            "Triangle wave"});
+            this.waveformbox.Location = new System.Drawing.Point(323, 143);
+            this.waveformbox.Margin = new System.Windows.Forms.Padding(6);
+            this.waveformbox.Name = "waveformbox";
+            this.waveformbox.Size = new System.Drawing.Size(184, 33);
+            this.waveformbox.TabIndex = 18;
+            this.waveformbox.SelectedIndexChanged += new System.EventHandler(this.waveformbox_SelectedIndexChanged);
             // 
-            // ConnectBtn
+            // label2
             // 
-            this.ConnectBtn.Location = new System.Drawing.Point(58, 506);
-            this.ConnectBtn.Name = "ConnectBtn";
-            this.ConnectBtn.Size = new System.Drawing.Size(151, 39);
-            this.ConnectBtn.TabIndex = 14;
-            this.ConnectBtn.Text = "Connect";
-            this.ConnectBtn.UseVisualStyleBackColor = true;
-            this.ConnectBtn.Click += new System.EventHandler(this.ConnectBtn_Click);
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(318, 115);
+            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(115, 25);
+            this.label2.TabIndex = 17;
+            this.label2.Text = "Waveform:";
             // 
             // ComplexImpedanceAnalyser
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 29F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(821, 563);
-            this.Controls.Add(this.ConnectBtn);
-            this.Controls.Add(this.resetbutton);
-            this.Controls.Add(this.Measure);
+            this.ClientSize = new System.Drawing.Size(717, 547);
             this.Controls.Add(this.rtfTerminal);
-            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.gbPortSettings);
-            this.Margin = new System.Windows.Forms.Padding(7);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "ComplexImpedanceAnalyser";
-            this.Text = "Complex Impedance Analyser";
+            this.Text = "Impedance Analyser";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.gbPortSettings.ResumeLayout(false);
             this.gbPortSettings.PerformLayout();
@@ -240,6 +312,12 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button resetbutton;
         private System.Windows.Forms.Button ConnectBtn;
+        private System.Windows.Forms.TextBox freqInput;
+        private System.Windows.Forms.Button freqencySetButton;
+        private System.Windows.Forms.Label freqLabel;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ComboBox waveformbox;
+        private System.Windows.Forms.Label label2;
     }
 }
 

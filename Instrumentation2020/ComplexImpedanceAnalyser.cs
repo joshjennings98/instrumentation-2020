@@ -77,6 +77,10 @@ namespace Instrumentation2020
             }
         }
 
+        private bool noCOMsFlag = false;
+        private int currentFreq = 1000;
+        private string currentWaveform = "Sinewave";
+
         public ComplexImpedanceAnalyser()
         {
             InitializeComponent();
@@ -96,6 +100,7 @@ namespace Instrumentation2020
             portNameBox.SelectedIndex = 0;
             baudRateBox.SelectedIndex = 0;
             timeoutBox.SelectedIndex = 0;
+            waveformbox.SelectedIndex = 0;
             rtfTerminal.Clear();
 
             // Get list of ports available and put into list
@@ -103,6 +108,12 @@ namespace Instrumentation2020
             foreach (string s in SerialPort.GetPortNames()) {
                 ports.Add(s);
             };
+
+            if (ports.Count == 0)
+            {
+                rtfTerminal.Text += "No COM ports available.\n";
+                noCOMsFlag = true;
+            }
 
             // Set data source
             portNameBox.DataSource = ports;
@@ -125,6 +136,60 @@ namespace Instrumentation2020
             rtfTerminal.Text += "Set port to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
         }
 
+        private byte[] checksum(byte[] data)
+        {
+            byte checksum = 0x00;
+            
+            foreach (var b in data)
+            {
+                checksum ^= b;
+            }
+
+            return new byte[] {checksum};
+        }
+
+        private static byte[] CombineByteArrays(byte[][] arrays)
+        {
+            byte[] bytes = new byte[arrays.Sum(a => a.Length)];
+            int offset = 0;
+
+            foreach (byte[] array in arrays)
+            {
+                Buffer.BlockCopy(array, 0, bytes, offset, array.Length);
+                offset += array.Length;
+            }
+
+            return bytes;
+        }
+
+        private byte[] formFreqMessage()
+        {
+            byte[] waveform = {0x00, 0x00, 0x20, 0x00};
+       
+            switch (currentWaveform)
+            {
+                case "Square wave":
+                    waveform = new byte[] {0x00, 0x00, 0x20, 0x28};
+                    break;
+                case "Triangle wave":
+                    waveform = new byte[] {0x00, 0x00, 0x20, 0x02};
+                    break;
+                case "Sine wave":
+                    waveform = new byte[] {0x00, 0x00, 0x20, 0x00};
+                    break;
+            }
+            byte[] id = {0xFF, 0x04, 0x08};
+            byte[] frequency = BitConverter.GetBytes(currentFreq);
+            Array.Reverse(frequency);
+            byte[] data = CombineByteArrays(new [] { id, frequency, waveform});//"FF0408" + frequency + waveform;
+            byte[] message = CombineByteArrays(new[] { data, checksum(data) });
+
+            string x = BitConverter.ToString(message);
+            rtfTerminal.Text += "Sending message: " + x + "\n";
+
+            return message;
+        }
+
         private void cmbPortName_SelectedIndexChanged(object sender, EventArgs e)
         {
             changePort();
@@ -134,6 +199,7 @@ namespace Instrumentation2020
         {
             changePort();
         }
+
         private void cmbBaudRate_TextUpdate(object sender, EventArgs e)
         {
             changePort();
@@ -193,7 +259,7 @@ namespace Instrumentation2020
         private void Measure_Click(object sender, EventArgs e)
         {
             // Set the timeout and open the port
-            _serialPort.ReadTimeout = Int32.Parse(timeoutBox.Text); ;
+            _serialPort.ReadTimeout = Int32.Parse(timeoutBox.Text);
             // Try and read the serial port data
             string message = readSerialEvent();
 
@@ -220,19 +286,33 @@ namespace Instrumentation2020
         private void resetbutton_Click(object sender, EventArgs e)
         {
             // Reset everything
-            portNameBox.SelectedIndex = 0;
-            baudRateBox.SelectedIndex = 0;
-            timeoutBox.SelectedIndex = 0;
             rtfTerminal.Clear();
             rtfTerminal.Text += "Settings reset to defaults.\n";
+
+            if (!noCOMsFlag)
+            {
+                portNameBox.SelectedIndex = 0;
+            } else
+            {
+                rtfTerminal.Text += "No COM ports available.\n";
+            }
+            baudRateBox.SelectedIndex = 0;
+            timeoutBox.SelectedIndex = 0;
         }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
-            _serialDataRxFlag = false;
-            _serialPort.Open();
-            _serialPort.ReceivedBytesThreshold = 1;
-            _serialPort.DataReceived += _serialPort_DataReceived;
+            if (!noCOMsFlag)
+            {
+                changePort();
+                _serialDataRxFlag = false;
+                _serialPort.Open();
+                _serialPort.ReceivedBytesThreshold = 1;
+                _serialPort.DataReceived += _serialPort_DataReceived;
+            } else
+            {
+                rtfTerminal.Text += "Cannot connect, no COM ports available.\n";
+            }
         }
 
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -261,6 +341,60 @@ namespace Instrumentation2020
             else {
                 _serialPort.DiscardInBuffer();
             };
+        }
+
+        private void freqInput_TextChanged(object sender, EventArgs e)
+        {
+            if (freqInput.Text != "" && int.TryParse(freqInput.Text, out _))
+            {
+                currentFreq = Int32.Parse(freqInput.Text);
+            }
+        }
+
+        private void freqencySetButton_Click(object sender, EventArgs e)
+        {
+            int i = 0;
+            if (freqInput.Text != "" && int.TryParse(freqInput.Text, out i) && i < 0xFFFFFFF) {
+                if (_serialPort.IsOpen)
+                {
+                    rtfTerminal.Text += "Set frequency to a " + currentFreq + "Hz " + currentWaveform + ".\n";
+                    freqInput.Text = "";
+                    byte[] message = formFreqMessage();
+                    try
+                    {
+                        _serialPort.Write(message, 0, message.Length);
+                    }
+                    catch (Exception ex)
+                    {
+                        rtfTerminal.Text += "Set frequency failed failed! \nError: " + ex.Message + "\n";
+                    }
+                }
+                else
+                {
+                    rtfTerminal.Text += "Serial port not open.\n";
+                }
+            }
+            else if (freqInput.Text == "")
+            {
+                rtfTerminal.Text += "Please specify a frequency.\n";
+            }
+            else if (!int.TryParse(freqInput.Text, out _))
+            {
+                rtfTerminal.Text += "Frequency must be a number.\n";
+            }
+            else if (i > 0xFFFFFFF)
+            {
+                rtfTerminal.Text += "Frequency must be less than 268435455.\n";
+            }
+            else
+            {
+                rtfTerminal.Text += "Invalid input.\n";
+            }
+        }
+
+        private void waveformbox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            currentWaveform = waveformbox.Text;
         }
     }
 }
