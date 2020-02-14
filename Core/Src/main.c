@@ -637,16 +637,18 @@ bool CalculateRxDataChecksum(void)
 
 void AD9833_Set_Output(void)
 {
+	HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
 	uint16_t size = 1;
 	uint8_t * base = (uint8_t*)registerValues;
 	uint8_t * dataPointer = (uint8_t*)registerValues;
 	while(dataPointer < base + sizeof(registerValues))
 	{
-		HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
+		//HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
 		HAL_SPI_Transmit(&hspi1, dataPointer, size, HAL_MAX_DELAY);
-		HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+		//HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
 		dataPointer += sizeof(uint16_t);
 	}
+	HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
 }
 
 /* USER CODE END 4 */

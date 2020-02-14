@@ -39,11 +39,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  17 .debug_line   0000bdf2  00000000  00000000  00056011  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    000d4993  00000000  00000000  00061e03  2**0
+ 18 .debug_str    000d49d1  00000000  00000000  00061e03  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  00136796  2**0
+ 19 .comment      0000007b  00000000  00000000  001367d4  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00004304  00000000  00000000  00136814  2**2
+ 20 .debug_frame  00004304  00000000  00000000  00136850  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -2351,53 +2351,55 @@ void AD9833_Set_Output(void)
  8001520:	b580      	push	{r7, lr}
  8001522:	b084      	sub	sp, #16
  8001524:	af00      	add	r7, sp, #0
+	HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
+ 8001526:	2200      	movs	r2, #0
+ 8001528:	2140      	movs	r1, #64	; 0x40
+ 800152a:	4811      	ldr	r0, [pc, #68]	; (8001570 <AD9833_Set_Output+0x50>)
+ 800152c:	f001 fd0c 	bl	8002f48 <HAL_GPIO_WritePin>
 	uint16_t size = 1;
- 8001526:	2301      	movs	r3, #1
- 8001528:	817b      	strh	r3, [r7, #10]
+ 8001530:	2301      	movs	r3, #1
+ 8001532:	817b      	strh	r3, [r7, #10]
 	uint8_t * base = (uint8_t*)registerValues;
- 800152a:	4b11      	ldr	r3, [pc, #68]	; (8001570 <AD9833_Set_Output+0x50>)
- 800152c:	607b      	str	r3, [r7, #4]
+ 8001534:	4b0f      	ldr	r3, [pc, #60]	; (8001574 <AD9833_Set_Output+0x54>)
+ 8001536:	607b      	str	r3, [r7, #4]
 	uint8_t * dataPointer = (uint8_t*)registerValues;
- 800152e:	4b10      	ldr	r3, [pc, #64]	; (8001570 <AD9833_Set_Output+0x50>)
- 8001530:	60fb      	str	r3, [r7, #12]
+ 8001538:	4b0e      	ldr	r3, [pc, #56]	; (8001574 <AD9833_Set_Output+0x54>)
+ 800153a:	60fb      	str	r3, [r7, #12]
 	while(dataPointer < base + sizeof(registerValues))
- 8001532:	e013      	b.n	800155c <AD9833_Set_Output+0x3c>
+ 800153c:	e009      	b.n	8001552 <AD9833_Set_Output+0x32>
 	{
-		HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
- 8001534:	2200      	movs	r2, #0
- 8001536:	2140      	movs	r1, #64	; 0x40
- 8001538:	480e      	ldr	r0, [pc, #56]	; (8001574 <AD9833_Set_Output+0x54>)
- 800153a:	f001 fd05 	bl	8002f48 <HAL_GPIO_WritePin>
+		//HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
 		HAL_SPI_Transmit(&hspi1, dataPointer, size, HAL_MAX_DELAY);
  800153e:	897a      	ldrh	r2, [r7, #10]
  8001540:	f04f 33ff 	mov.w	r3, #4294967295
  8001544:	68f9      	ldr	r1, [r7, #12]
  8001546:	480c      	ldr	r0, [pc, #48]	; (8001578 <AD9833_Set_Output+0x58>)
  8001548:	f002 faac 	bl	8003aa4 <HAL_SPI_Transmit>
-		HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
- 800154c:	2201      	movs	r2, #1
- 800154e:	2140      	movs	r1, #64	; 0x40
- 8001550:	4808      	ldr	r0, [pc, #32]	; (8001574 <AD9833_Set_Output+0x54>)
- 8001552:	f001 fcf9 	bl	8002f48 <HAL_GPIO_WritePin>
+		//HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
 		dataPointer += sizeof(uint16_t);
- 8001556:	68fb      	ldr	r3, [r7, #12]
- 8001558:	3302      	adds	r3, #2
- 800155a:	60fb      	str	r3, [r7, #12]
+ 800154c:	68fb      	ldr	r3, [r7, #12]
+ 800154e:	3302      	adds	r3, #2
+ 8001550:	60fb      	str	r3, [r7, #12]
 	while(dataPointer < base + sizeof(registerValues))
- 800155c:	687b      	ldr	r3, [r7, #4]
- 800155e:	330a      	adds	r3, #10
- 8001560:	68fa      	ldr	r2, [r7, #12]
- 8001562:	429a      	cmp	r2, r3
- 8001564:	d3e6      	bcc.n	8001534 <AD9833_Set_Output+0x14>
+ 8001552:	687b      	ldr	r3, [r7, #4]
+ 8001554:	330a      	adds	r3, #10
+ 8001556:	68fa      	ldr	r2, [r7, #12]
+ 8001558:	429a      	cmp	r2, r3
+ 800155a:	d3f0      	bcc.n	800153e <AD9833_Set_Output+0x1e>
 	}
+	HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+ 800155c:	2201      	movs	r2, #1
+ 800155e:	2140      	movs	r1, #64	; 0x40
+ 8001560:	4803      	ldr	r0, [pc, #12]	; (8001570 <AD9833_Set_Output+0x50>)
+ 8001562:	f001 fcf1 	bl	8002f48 <HAL_GPIO_WritePin>
 }
  8001566:	bf00      	nop
  8001568:	3710      	adds	r7, #16
  800156a:	46bd      	mov	sp, r7
  800156c:	bd80      	pop	{r7, pc}
  800156e:	bf00      	nop
- 8001570:	20000184 	.word	0x20000184
- 8001574:	40020400 	.word	0x40020400
+ 8001570:	40020400 	.word	0x40020400
+ 8001574:	20000184 	.word	0x20000184
  8001578:	2000024c 	.word	0x2000024c
 
 0800157c <Error_Handler>:
@@ -2532,10 +2534,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
  8001632:	60fb      	str	r3, [r7, #12]
  8001634:	68fb      	ldr	r3, [r7, #12]
     /**ADC1 GPIO Configuration    
-    PA4     ------> ADC1_IN4 
+    PA4     ------> ADC1_IN4
+    PA6     ------> ADC1_IN6 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_4;
- 8001636:	2310      	movs	r3, #16
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_6;
+ 8001636:	2350      	movs	r3, #80	; 0x50
  8001638:	617b      	str	r3, [r7, #20]
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
  800163a:	2303      	movs	r3, #3
@@ -3201,99 +3204,45 @@ void SystemInit(void)
  8001958:	e000ed00 	.word	0xe000ed00
 
 0800195c <Reset_Handler>:
-
-    .section  .text.Reset_Handler
-  .weak  Reset_Handler
-  .type  Reset_Handler, %function
-Reset_Handler:  
-  ldr   sp, =_estack      /* set stack pointer */
  800195c:	f8df d034 	ldr.w	sp, [pc, #52]	; 8001994 <LoopFillZerobss+0x14>
-
-/* Copy the data segment initializers from flash to SRAM */  
-  movs  r1, #0
  8001960:	2100      	movs	r1, #0
-  b  LoopCopyDataInit
  8001962:	e003      	b.n	800196c <LoopCopyDataInit>
 
 08001964 <CopyDataInit>:
-
-CopyDataInit:
-  ldr  r3, =_sidata
  8001964:	4b0c      	ldr	r3, [pc, #48]	; (8001998 <LoopFillZerobss+0x18>)
-  ldr  r3, [r3, r1]
  8001966:	585b      	ldr	r3, [r3, r1]
-  str  r3, [r0, r1]
  8001968:	5043      	str	r3, [r0, r1]
-  adds  r1, r1, #4
  800196a:	3104      	adds	r1, #4
 
 0800196c <LoopCopyDataInit>:
-    
-LoopCopyDataInit:
-  ldr  r0, =_sdata
  800196c:	480b      	ldr	r0, [pc, #44]	; (800199c <LoopFillZerobss+0x1c>)
-  ldr  r3, =_edata
  800196e:	4b0c      	ldr	r3, [pc, #48]	; (80019a0 <LoopFillZerobss+0x20>)
-  adds  r2, r0, r1
  8001970:	1842      	adds	r2, r0, r1
-  cmp  r2, r3
  8001972:	429a      	cmp	r2, r3
-  bcc  CopyDataInit
  8001974:	d3f6      	bcc.n	8001964 <CopyDataInit>
-  ldr  r2, =_sbss
  8001976:	4a0b      	ldr	r2, [pc, #44]	; (80019a4 <LoopFillZerobss+0x24>)
-  b  LoopFillZerobss
  8001978:	e002      	b.n	8001980 <LoopFillZerobss>
 
 0800197a <FillZerobss>:
-/* Zero fill the bss segment. */  
-FillZerobss:
-  movs  r3, #0
  800197a:	2300      	movs	r3, #0
-  str  r3, [r2], #4
  800197c:	f842 3b04 	str.w	r3, [r2], #4
 
 08001980 <LoopFillZerobss>:
-    
-LoopFillZerobss:
-  ldr  r3, = _ebss
  8001980:	4b09      	ldr	r3, [pc, #36]	; (80019a8 <LoopFillZerobss+0x28>)
-  cmp  r2, r3
  8001982:	429a      	cmp	r2, r3
-  bcc  FillZerobss
  8001984:	d3f9      	bcc.n	800197a <FillZerobss>
-
-/* Call the clock system intitialization function.*/
-  bl  SystemInit   
  8001986:	f7ff ffd3 	bl	8001930 <SystemInit>
-/* Call static constructors */
-    bl __libc_init_array
  800198a:	f003 ff69 	bl	8005860 <__libc_init_array>
-/* Call the application's entry point.*/
-  bl  main
  800198e:	f7ff fa23 	bl	8000dd8 <main>
-  bx  lr    
  8001992:	4770      	bx	lr
-  ldr   sp, =_estack      /* set stack pointer */
  8001994:	20020000 	.word	0x20020000
-  ldr  r3, =_sidata
  8001998:	08005900 	.word	0x08005900
-  ldr  r0, =_sdata
  800199c:	20000000 	.word	0x20000000
-  ldr  r3, =_edata
  80019a0:	20000154 	.word	0x20000154
-  ldr  r2, =_sbss
  80019a4:	20000154 	.word	0x20000154
-  ldr  r3, = _ebss
  80019a8:	2000037c 	.word	0x2000037c
 
 080019ac <ADC_IRQHandler>:
- * @retval None       
-*/
-    .section  .text.Default_Handler,"ax",%progbits
-Default_Handler:
-Infinite_Loop:
-  b  Infinite_Loop
  80019ac:	e7fe      	b.n	80019ac <ADC_IRQHandler>
 	...
 

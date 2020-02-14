@@ -11,4 +11,4 @@ main.c:580:6:HAL_UART_RxCpltCallback	16	static
 main.c:589:6:UART_Rx_Handler	16	static
 main.c:623:6:CalculateRxDataChecksum	16	static
 main.c:638:6:AD9833_Set_Output	24	static
-main.c:658:6:Error_Handler	4	static
+main.c:660:6:Error_Handler	4	static
