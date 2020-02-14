@@ -34,6 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ADC_BUF_LEN 41
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,6 +43,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
+
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim2;
@@ -62,14 +66,24 @@ uint32_t counterDifference = 0;
 uint16_t startedCounting = 0;
 bool newCaptureValue = false;
 
+float firADC;
+uint16_t rawADC;
+
+// ADC stuff
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
+uint16_t adc_buf[ADC_BUF_LEN];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 void UART_Rx_Handler(void);
 void AD9833_Set_Output(void);
@@ -110,9 +124,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   // Reset AD9833
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
@@ -129,6 +145,69 @@ int main(void)
   // Start timer interrupts
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
+
+  // Start ADC DMA thing
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
+
+  // Initialise filter
+  /*
+  sampling frequency: 4000 Hz
+
+  * 0 Hz - 1000 Hz
+    gain = 1
+    desired ripple = 5 dB
+    actual ripple = 4.036115307344851 dB
+
+  * 1100 Hz - 2000 Hz
+    gain = 0
+    desired attenuation = -40 dB
+    actual attenuation = -40.28511284233681 dB
+
+  */
+  static double filter_taps[ADC_BUF_LEN] = {
+    -0.020471781131228717,
+    -0.023991098974286657,
+    0.014422489930370508,
+    0.0603462959957095,
+    0.04967707225039325,
+    0.0004708285444206645,
+    -0.0073143250637859245,
+    0.026503860938436312,
+    0.02245622884323838,
+    -0.019740878251392393,
+    -0.01432410297619291,
+    0.03192513675259614,
+    0.017699469981087772,
+    -0.04069309748008898,
+    -0.016345345455220213,
+    0.06098164262015534,
+    0.017226748163479157,
+    -0.10412779068396433,
+    -0.017056389606946634,
+    0.3178056786209078,
+    0.5173439457035668,
+    0.3178056786209078,
+    -0.017056389606946634,
+    -0.10412779068396433,
+    0.017226748163479157,
+    0.06098164262015534,
+    -0.016345345455220213,
+    -0.04069309748008898,
+    0.017699469981087772,
+    0.03192513675259614,
+    -0.01432410297619291,
+    -0.019740878251392393,
+    0.02245622884323838,
+    0.026503860938436312,
+    -0.0073143250637859245,
+    0.0004708285444206645,
+    0.04967707225039325,
+    0.0603462959957095,
+    0.014422489930370508,
+    -0.023991098974286657,
+    -0.020471781131228717
+  };
+
 
   /* USER CODE END 2 */
  
@@ -152,6 +231,23 @@ int main(void)
 		  updateSignalFreqFlag = false;
 	  }
 
+
+
+	  // Get ADC value
+	 //HAL_ADC_Start(&hadc1);
+	 //HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	 //firADC = HAL_ADC_GetValue(&hadc1);
+	  firADC = 0;
+	  int i = 0;
+	  while (adc_buf[i] > 0) {
+		  //firADC += (filter_taps[ADC_BUF_LEN - i] * (float)adc_buf[i]);
+
+		  firADC += (filter_taps[i] * (float)adc_buf[i]);
+		  //firADC += ((float)adc_buf[i] * (1.0 / 41.0));
+		  i++;
+	  }
+
+	  rawADC = adc_buf[0];
 
 	  // Toggle LED pin to show we're alive
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
@@ -214,6 +310,56 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
   * @brief SPI1 Initialization Function
   * @param None
   * @retval None
@@ -236,7 +382,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -344,6 +490,22 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
 }
 
@@ -486,6 +648,7 @@ void AD9833_Set_Output(void)
 		dataPointer += sizeof(uint16_t);
 	}
 }
+
 /* USER CODE END 4 */
 
 /**

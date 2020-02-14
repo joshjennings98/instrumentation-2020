@@ -28,3 +28,8 @@ void AD9833CalculateRegister(long frequency, int waveform){
 	registerValues[4] = waveform; // TODO waveform error check
 }
 
+void AD9833_Read_Output(void)
+{
+	HAL_GPIO_ReadPin(AD9833_CS_GPIO_Port, AD9833_CS_Pin);
+}
+
