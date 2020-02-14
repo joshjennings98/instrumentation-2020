@@ -294,9 +294,10 @@
             this.ClientSize = new System.Drawing.Size(716, 546);
             this.Controls.Add(this.rtfTerminal);
             this.Controls.Add(this.gbPortSettings);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.Name = "ComplexImpedanceAnalyser";
-            this.Text = "Impedance Analyser";
+            this.Text = "Complex Impedance Analyser";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.gbPortSettings.ResumeLayout(false);
             this.gbPortSettings.PerformLayout();

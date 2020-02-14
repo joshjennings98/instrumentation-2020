@@ -32,6 +32,8 @@ namespace Instrumentation2020
                 data = this.getData(message, ID);
                 this.prettyVersion = String.Concat("The ", messageType, " is ", data, ".\n");
             }
+
+
             private string getMessageType(byte data)
             {
                 string dataType = "NULL"; // get rid of once I sort the exception case
@@ -126,12 +128,12 @@ namespace Instrumentation2020
 
         private void changePort()
         {
-            Console.WriteLine(baudRateBox);
+            
             // Make a new serial port object with the new baud rate
-            if (baudRateBox.Text != "") {
+            if (baudRateBox.Text != "" && !noCOMsFlag) {
                 _serialPort = new SerialPort(portNameBox.Text, Int32.Parse(baudRateBox.Text));
             }
-            else
+            else if (!noCOMsFlag)
             {
                 _serialPort = new SerialPort(portNameBox.Text);
             }
@@ -325,8 +327,6 @@ namespace Instrumentation2020
                     _serialPort.DataReceived += _serialPort_DataReceived;
                     baudRateBox.Enabled = false;
                     Measure.Enabled = true;
-                    ConnectBtn.Enabled = false;
-                    ConnectBtn.Visible = false;
                     portNameBox.Enabled = false;
 
                     rtfTerminal.Clear();
@@ -385,25 +385,22 @@ namespace Instrumentation2020
         private void setFrequency(bool useField = true)
         {
             int i = 0;
-            if ((freqInput.Text != "" && int.TryParse(freqInput.Text, out i) && i < 0xFFFFFFF) || useField == false)
+            if (!_serialPort.IsOpen)
             {
-                if (_serialPort.IsOpen)
+                rtfTerminal.Text += "Serial port not open.\n";
+            }
+            else if ((freqInput.Text != "" && int.TryParse(freqInput.Text, out i) && i < 0xFFFFFFF) || useField == false)
+            {
+                rtfTerminal.Text += "Frequency set to a " + currentFreq + "Hz " + currentWaveform + ".\n";
+                freqInput.Text = "";
+                byte[] message = formFreqMessage();
+                try
                 {
-                    rtfTerminal.Text += "Frequency set to a " + currentFreq + "Hz " + currentWaveform + ".\n";
-                    freqInput.Text = "";
-                    byte[] message = formFreqMessage();
-                    try
-                    {
-                        _serialPort.Write(message, 0, message.Length);
-                    }
-                    catch (Exception ex)
-                    {
-                        rtfTerminal.Text += "Set frequency failed failed! \nError: " + ex.Message + "\n";
-                    }
+                    _serialPort.Write(message, 0, message.Length);
                 }
-                else
+                catch (Exception ex)
                 {
-                    rtfTerminal.Text += "Serial port not open.\n";
+                    rtfTerminal.Text += "Set frequency failed! \nError: " + ex.Message + "\n";
                 }
             }
             else if (freqInput.Text == "")
@@ -438,10 +435,6 @@ namespace Instrumentation2020
         {
             baudRateBox.Enabled = true;
             Measure.Enabled = false;
-            //ConnectBtn.Enabled = true;
-            //ConnectBtn.Visible = true;
-            //DisconnectButton.Enabled = false;
-            //DisconnectButton.Visible = false;
             ConnectBtn.Text = "Connect";
             portNameBox.Enabled = true;
             _serialPort.Close();
