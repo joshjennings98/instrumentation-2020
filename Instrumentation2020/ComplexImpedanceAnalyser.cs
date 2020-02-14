@@ -80,6 +80,7 @@ namespace Instrumentation2020
         private bool noCOMsFlag = false;
         private int currentFreq = 1000;
         private string currentWaveform = "Sinewave";
+        private bool connectBool = false;
 
         public ComplexImpedanceAnalyser()
         {
@@ -313,27 +314,35 @@ namespace Instrumentation2020
 
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
-            if (!noCOMsFlag)
+            if (connectBool == false)
             {
-                changePort();
-                _serialDataRxFlag = false;
-                _serialPort.Open();
-                _serialPort.ReceivedBytesThreshold = 1;
-                _serialPort.DataReceived += _serialPort_DataReceived;
-                baudRateBox.Enabled = false;
-                Measure.Enabled = true;
-                ConnectBtn.Enabled = false;
-                ConnectBtn.Visible = false;
-                DisconnectButton.Enabled = true;
-                DisconnectButton.Visible = true;
-                portNameBox.Enabled = false;
+                if (!noCOMsFlag)
+                {
+                    changePort();
+                    _serialDataRxFlag = false;
+                    _serialPort.Open();
+                    _serialPort.ReceivedBytesThreshold = 1;
+                    _serialPort.DataReceived += _serialPort_DataReceived;
+                    baudRateBox.Enabled = false;
+                    Measure.Enabled = true;
+                    ConnectBtn.Enabled = false;
+                    ConnectBtn.Visible = false;
+                    portNameBox.Enabled = false;
 
-                rtfTerminal.Clear();
-                rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
-            }
-            else
+                    rtfTerminal.Clear();
+                    rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
+
+                    ConnectBtn.Text = "Disconnect";
+                    connectBool = true;
+                }
+                else
+                {
+                    rtfTerminal.Text += "Cannot connect, no COM ports available.\n";
+                }
+            } else if (connectBool == true)
             {
-                rtfTerminal.Text += "Cannot connect, no COM ports available.\n";
+                disconnectSerialStuff();
+                connectBool = false;
             }
         }
 
@@ -429,17 +438,13 @@ namespace Instrumentation2020
         {
             baudRateBox.Enabled = true;
             Measure.Enabled = false;
-            ConnectBtn.Enabled = true;
-            ConnectBtn.Visible = true;
-            DisconnectButton.Enabled = false;
-            DisconnectButton.Visible = false;
+            //ConnectBtn.Enabled = true;
+            //ConnectBtn.Visible = true;
+            //DisconnectButton.Enabled = false;
+            //DisconnectButton.Visible = false;
+            ConnectBtn.Text = "Connect";
             portNameBox.Enabled = true;
             _serialPort.Close();
-        }
-
-        private void DisconnectButton_Click(object sender, EventArgs e)
-        {
-            disconnectSerialStuff();
         }
     }
 }
