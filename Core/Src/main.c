@@ -54,8 +54,13 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint16_t registerValues[5]; // Buffer to store calculated SPI Tx to transmit to ad9833
-uint8_t uartRxBytes[12]; // Buffer to store Recieved UART bytes
 bool updateSignalFreqFlag = false; // Flag to request AD9833 frequency update#
+
+uint8_t uartRxBytes[12]; // Buffer to store Recieved UART bytes
+
+
+uint8_t pgaGainValue; // Value to store current PGA gain
+bool updatePGAGainFlag = false; // Flag to request PGA gain update
 
 /* Captured Values */
 uint32_t CounterOneValue = 0;
@@ -87,6 +92,7 @@ static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 void UART_Rx_Handler(void);
 void AD9833_Set_Output(void);
+void PGA_Set_Gain(void);
 bool CalculateRxDataChecksum(void);
 /* USER CODE END PFP */
 
@@ -130,13 +136,19 @@ int main(void)
   MX_TIM2_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  // Reset AD9833
+
+  // Set All SPI Periperal CS High
+  HAL_GPIO_WritePin(PGA_CS_GPIO_Port, PGA_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+
+  // Reset AD9833
   HAL_Delay(10);
   uint16_t resetValue = 0x100;
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(&hspi1, (uint8_t*)resetValue, sizeof(resetValue)/sizeof(uint16_t), HAL_MAX_DELAY);
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+
+
 
   // UART interrupts
   HAL_UART_Receive_IT(&huart2, (uint8_t*)uartRxBytes, 12);
@@ -230,6 +242,11 @@ int main(void)
 		  AD9833_Set_Output();
 		  updateSignalFreqFlag = false;
 	  }
+	  // Update PGA Gain
+	  if(updatePGAGainFlag == true){
+		  PGA_Set_Gain();
+		  updatePGAGainFlag = false;
+	  }
 
 
 
@@ -250,7 +267,7 @@ int main(void)
 	  rawADC = adc_buf[0];
 
 	  // Toggle LED pin to show we're alive
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+	  HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin);
 
 	  // Arbitrary Loop Delay To stop spamming everything
 	  HAL_Delay(1000);
@@ -520,16 +537,27 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(PGA_CS_GPIO_Port, PGA_CS_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, RED_LED_Pin|GRN_LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8;
+  /*Configure GPIO pin : PGA_CS_Pin */
+  GPIO_InitStruct.Pin = PGA_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(PGA_CS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : RED_LED_Pin GRN_LED_Pin */
+  GPIO_InitStruct.Pin = RED_LED_Pin|GRN_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -588,7 +616,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 void UART_Rx_Handler(void)
 {
-	// TODO implement Error Checking.
 
 	if(uartRxBytes[0] != 0xFF) 	// If header byte is not first byte abandon
 		return;
@@ -600,6 +627,7 @@ void UART_Rx_Handler(void)
 	// Data is valid so handle it
 
 	int freq = 0;
+	int signal = 0;
 	// Switch on Data ID
 	switch(uartRxBytes[1])
 	{
@@ -610,11 +638,15 @@ void UART_Rx_Handler(void)
 	case(0x02):
 			break;
 	case(0x04): // frequency change message
-			freq = uartRxBytes[6] | ( (int)uartRxBytes[5] << 8 ) | ( (int)uartRxBytes[4] << 16 ) | ( (int)uartRxBytes[3] << 24 );
-			AD9833CalculateRegister(freq, 0x2000);
+			freq = uartRxBytes[6] | ((int)uartRxBytes[5] << 8) | ((int)uartRxBytes[4] << 16) | ((int)uartRxBytes[3] << 24);
+			signal = uartRxBytes[10] | ((int)uartRxBytes[9] << 8) | ((int)uartRxBytes[8] << 16) | ((int)uartRxBytes[7] << 24);
+			AD9833CalculateRegister(freq, signal);
 			// Set Update Frequency Flag so AD9833 updates in main task loop
 			updateSignalFreqFlag = true;
 			break;
+	case(0x05): // set PGA gain message
+			pgaGainValue = uartRxBytes[3];
+			updatePGAGainFlag = true;
 	default:
 		break;
 	}
@@ -649,6 +681,57 @@ void AD9833_Set_Output(void)
 		dataPointer += sizeof(uint16_t);
 	}
 	HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
+}
+
+void PGA_Set_Gain(void)
+{
+	// 8 bit values for seperate instruction and control registers
+	// Channel select register is not needed as single channel device used
+	uint8_t instructionReg = 0x40; // write to gain register
+	uint8_t controlReg;
+
+	// Switch on allowable gain values, and set relevant bits in control reg
+	switch(pgaGainValue){
+	case 0x0 : // TODO implement shutdown/sleep whatever its called
+		break;
+	case 1 :
+		controlReg = 0x0;
+		break;
+	case 2 :
+		controlReg = 0x1;
+		break;
+	case 4 :
+		controlReg = 0x2;
+		break;
+	case 5 :
+		controlReg = 0x3;
+		break;
+	case 8:
+		controlReg = 0x4;
+		break;
+	case 10:
+		controlReg = 0x5;
+		break;
+	case 16:
+		controlReg = 0x6;
+		break;
+	case 31:
+		controlReg = 0x7;
+		break;
+	default:	// gain was not valid so don't send a command
+		return;
+	}
+
+	// Assemble data to send via SPI
+	uint16_t spiWord = ((uint16_t)instructionReg << 8) | controlReg;
+
+	// Set CS Low
+	HAL_GPIO_WritePin(PGA_CS_GPIO_Port, PGA_CS_Pin, GPIO_PIN_RESET);
+	// Send SPI data
+	HAL_SPI_Transmit(&hspi1, (uint8_t*)spiWord, sizeof(spiWord)/sizeof(uint16_t), HAL_MAX_DELAY);
+	// Set CS High
+	HAL_GPIO_WritePin(PGA_CS_GPIO_Port, PGA_CS_Pin, GPIO_PIN_SET);
+
 }
 
 /* USER CODE END 4 */
