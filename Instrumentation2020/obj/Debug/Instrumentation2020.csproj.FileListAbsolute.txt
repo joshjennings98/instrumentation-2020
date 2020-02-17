@@ -34,3 +34,5 @@ C:\Users\Josh\Documents\GitHub\instrumentation2020\Instrumentation2020\obj\Debug
 C:\Users\Josh\Documents\GitHub\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.csproj.GenerateResource.cache
 C:\Users\Josh\Documents\GitHub\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.exe
 C:\Users\Josh\Documents\GitHub\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.pdb
+C:\Users\Josh\Documents\GitHub\instrumentation2020\Instrumentation2020\bin\Debug\ZedGraph.dll
+C:\Users\Josh\Documents\GitHub\instrumentation2020\Instrumentation2020\obj\Debug\Instrumentation2020.csproj.CopyComplete

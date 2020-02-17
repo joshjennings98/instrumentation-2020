@@ -51,6 +51,7 @@
             this.lblBaudRate = new System.Windows.Forms.Label();
             this.rtfTerminal = new System.Windows.Forms.RichTextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
             this.gbPortSettings.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -144,6 +145,7 @@
             // 
             this.waveformbox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.waveformbox.DropDownWidth = 67;
+            this.waveformbox.Enabled = false;
             this.waveformbox.FormattingEnabled = true;
             this.waveformbox.ItemHeight = 25;
             this.waveformbox.Items.AddRange(new object[] {
@@ -169,6 +171,7 @@
             // 
             // freqencySetButton
             // 
+            this.freqencySetButton.Enabled = false;
             this.freqencySetButton.Location = new System.Drawing.Point(528, 142);
             this.freqencySetButton.Margin = new System.Windows.Forms.Padding(4);
             this.freqencySetButton.Name = "freqencySetButton";
@@ -201,6 +204,7 @@
             // 
             // freqInput
             // 
+            this.freqInput.Enabled = false;
             this.freqInput.Location = new System.Drawing.Point(26, 142);
             this.freqInput.Margin = new System.Windows.Forms.Padding(4);
             this.freqInput.Name = "freqInput";
@@ -223,6 +227,7 @@
             // 
             // resetbutton
             // 
+            this.resetbutton.Enabled = false;
             this.resetbutton.Location = new System.Drawing.Point(352, 200);
             this.resetbutton.Margin = new System.Windows.Forms.Padding(6);
             this.resetbutton.Name = "resetbutton";
@@ -246,7 +251,7 @@
             // timeoutBox
             // 
             this.timeoutBox.DropDownWidth = 67;
-            this.timeoutBox.FormattingEnabled = true;
+            this.timeoutBox.Enabled = false;
             this.timeoutBox.ItemHeight = 25;
             this.timeoutBox.Items.AddRange(new object[] {
             "1000",
@@ -339,7 +344,7 @@
             this.rtfTerminal.Location = new System.Drawing.Point(14, 4);
             this.rtfTerminal.Margin = new System.Windows.Forms.Padding(6);
             this.rtfTerminal.Name = "rtfTerminal";
-            this.rtfTerminal.Size = new System.Drawing.Size(672, 283);
+            this.rtfTerminal.Size = new System.Drawing.Size(669, 283);
             this.rtfTerminal.TabIndex = 11;
             this.rtfTerminal.Text = "";
             this.rtfTerminal.TextChanged += new System.EventHandler(this.rtfTerminal_TextChanged);
@@ -350,17 +355,36 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
+            // zedGraphControl1
+            // 
+            this.zedGraphControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.zedGraphControl1.Location = new System.Drawing.Point(708, 4);
+            this.zedGraphControl1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.zedGraphControl1.Name = "zedGraphControl1";
+            this.zedGraphControl1.ScrollGrace = 0D;
+            this.zedGraphControl1.ScrollMaxX = 0D;
+            this.zedGraphControl1.ScrollMaxY = 0D;
+            this.zedGraphControl1.ScrollMaxY2 = 0D;
+            this.zedGraphControl1.ScrollMinX = 0D;
+            this.zedGraphControl1.ScrollMinY = 0D;
+            this.zedGraphControl1.ScrollMinY2 = 0D;
+            this.zedGraphControl1.Size = new System.Drawing.Size(646, 627);
+            this.zedGraphControl1.TabIndex = 22;
+            // 
             // ComplexImpedanceAnalyser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(716, 646);
+            this.ClientSize = new System.Drawing.Size(1424, 646);
+            this.Controls.Add(this.zedGraphControl1);
             this.Controls.Add(this.rtfTerminal);
             this.Controls.Add(this.gbPortSettings);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "ComplexImpedanceAnalyser";
             this.Text = "Complex Impedance Analyser";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ComplexImpedanceAnalyser_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.gbPortSettings.ResumeLayout(false);
             this.gbPortSettings.PerformLayout();
@@ -391,6 +415,7 @@
         private System.Windows.Forms.Label PGAGainLabel;
         private System.Windows.Forms.Button SETPGAGAINButton;
         private System.Windows.Forms.Label RandomLabel;
+        private ZedGraph.ZedGraphControl zedGraphControl1;
     }
 }
 

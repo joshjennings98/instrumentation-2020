@@ -5,14 +5,17 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.IO.Ports;
+using ZedGraph;
 
 namespace Instrumentation2020
 {
     public partial class ComplexImpedanceAnalyser : Form
     {
+        System.Threading.Thread t;
+
         static SerialPort _serialPort;
         static bool _serialDataRxFlag;
         static byte[] _serialRxBuffer;
@@ -32,7 +35,6 @@ namespace Instrumentation2020
                 data = this.getData(message, ID);
                 this.prettyVersion = String.Concat("The ", messageType, " is ", data, ".\n");
             }
-
 
             private string getMessageType(byte data)
             {
@@ -109,6 +111,8 @@ namespace Instrumentation2020
 
             rtfTerminal.Clear();
 
+            InitGraph(zedGraphControl1);
+
             // Get list of ports available and put into list
             List<string> ports = new List<string>();
             foreach (string s in SerialPort.GetPortNames()) {
@@ -125,7 +129,10 @@ namespace Instrumentation2020
             portNameBox.DataSource = ports;
 
             // Create a new SerialPort object with default settings.
-            _serialPort = new SerialPort();            
+            _serialPort = new SerialPort();
+
+            t = new System.Threading.Thread(DoThisAllTheTime);
+            t.Start();
         }
 
         private void changePort()
@@ -177,8 +184,8 @@ namespace Instrumentation2020
             byte[] data = CombineByteArrays(new[] { id, gain, empty });
             byte[] message = CombineByteArrays(new[] { data, checksum(data) });
 
-            string x = BitConverter.ToString(message);
-            rtfTerminal.Text += "Sending message: " + x + "\n";
+            //string x = BitConverter.ToString(message);
+            //rtfTerminal.Text += "Sending message: " + x + "\n";
 
             return message;
         }
@@ -351,6 +358,12 @@ namespace Instrumentation2020
                     portNameBox.Enabled = false;
                     PGAGainBox.Enabled = true;
                     SETPGAGAINButton.Enabled = true;
+                    freqInput.Enabled = true;
+                    freqencySetButton.Enabled = true;
+                    Measure.Enabled = true;
+                    timeoutBox.Enabled = true;
+                    waveformbox.Enabled = true;
+                    resetbutton.Enabled = true;
 
                     rtfTerminal.Clear();
                     rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
@@ -412,7 +425,7 @@ namespace Instrumentation2020
             }
             else
             {
-                rtfTerminal.Text += "PGA Gain set to a " + PGAGainValue + ".\n";
+                rtfTerminal.Text += "PGA Gain set to " + PGAGainValue + ".\n";
                 byte[] message = formPGAGainMessage();
                 try
                 {
@@ -454,7 +467,7 @@ namespace Instrumentation2020
             {
                 rtfTerminal.Text += "Frequency must be a number.\n";
             }
-            else if (i > 0xFFFFFFF)
+            else if (i > 0x989680)
             {
                 rtfTerminal.Text += "Frequency must be less than 268435455.\n";
             }
@@ -476,13 +489,19 @@ namespace Instrumentation2020
 
         private void disconnectSerialStuff()
         {
+            _serialPort.Close();
             baudRateBox.Enabled = true;
             Measure.Enabled = false;
             ConnectBtn.Text = "Connect";
             portNameBox.Enabled = true;
             PGAGainBox.Enabled = false;
             SETPGAGAINButton.Enabled = false;
-            _serialPort.Close();
+            freqInput.Enabled = false;
+            freqencySetButton.Enabled = false;
+            Measure.Enabled = false;
+            timeoutBox.Enabled = false;
+            waveformbox.Enabled = false;
+            resetbutton.Enabled = false;
         }
 
         private void PGAGainBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -493,6 +512,68 @@ namespace Instrumentation2020
         private void SETPGAGAINButton_Click(object sender, EventArgs e)
         {
             setPGAGain();
+        }
+
+
+        private void InitGraph(ZedGraphControl zgc)
+        {
+            // get a reference to the GraphPane
+            GraphPane myPane = zgc.GraphPane;
+
+            // Set the Titles
+            myPane.Title.Text = "Complex Impedance";
+            myPane.XAxis.Title.Text = "Real";
+            myPane.YAxis.Title.Text = "Imaginary";
+
+            myPane.XAxis.MajorGrid.IsVisible = true;
+            myPane.YAxis.MajorGrid.IsVisible = true;
+
+            myPane.XAxis.Scale.Min = -1;
+            myPane.XAxis.Scale.Max = 1;
+
+            myPane.YAxis.Scale.Min = -1;
+            myPane.YAxis.Scale.Max = 1;
+
+            myPane.YAxis.MajorGrid.IsZeroLine = true;
+            myPane.XAxis.MajorGrid.IsZeroLine = true;
+
+            ArrowObj arrow = new ArrowObj(Color.Red, 30, 0.0, 0.0, 0.0, 0.0);
+            arrow.Line.Width = 2;
+            myPane.GraphObjList.Add(arrow);
+        }
+
+        public void updateGraph(ZedGraphControl zgc, double x, double y)
+        {
+            GraphPane myPane = zgc.GraphPane;
+            ArrowObj arrow = new ArrowObj(Color.Red, 30, 0.0, 0.0, x, y);
+            arrow.Line.Width = 2;
+            myPane.GraphObjList.RemoveAt(0);
+            myPane.GraphObjList.Add(arrow);
+            zgc.Refresh();
+        }
+
+
+        public void DoThisAllTheTime()
+        {
+            double x = 0.0;
+            
+            while (true)
+            {
+                //you need to use Invoke because the new thread can't access the UI elements directly
+                Thread.Sleep(10);
+                MethodInvoker mi = delegate () {
+
+                    updateGraph(zedGraphControl1, (double)(Control.MousePosition.X - 500) / 1000, (double)(Control.MousePosition.Y - 300) / 1000);
+                };
+                this.Invoke(mi);
+            }
+        }
+
+        private void ComplexImpedanceAnalyser_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (t.IsAlive) {
+                t.Abort();
+            }
         }
     }
 }
