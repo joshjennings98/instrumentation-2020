@@ -334,6 +334,7 @@ namespace Instrumentation2020
             //baudRateBox.SelectedIndex = 7;
             timeoutBox.SelectedIndex = 0;
             currentFreq = 1000;
+            freqInput.Text = "1000";
             currentWaveform = "Sinewave";
             waveformbox.SelectedIndex = 0;
             PGAGainBox.SelectedIndex = 0;
@@ -448,7 +449,7 @@ namespace Instrumentation2020
             else if ((freqInput.Text != "" && int.TryParse(freqInput.Text, out i) && i < 0xFFFFFFF) || useField == false)
             {
                 rtfTerminal.Text += "Frequency set to a " + currentFreq + "Hz " + currentWaveform + ".\n";
-                freqInput.Text = "";
+                //freqInput.Text = "";
                 byte[] message = formFreqMessage();
                 try
                 {
@@ -469,7 +470,7 @@ namespace Instrumentation2020
             }
             else if (i > 0x989680)
             {
-                rtfTerminal.Text += "Frequency must be less than 268435455.\n";
+                rtfTerminal.Text += "Frequency must be less than 10MHz.\n";
             }
             else
             {
@@ -517,10 +518,8 @@ namespace Instrumentation2020
 
         private void InitGraph(ZedGraphControl zgc)
         {
-            // get a reference to the GraphPane
             GraphPane myPane = zgc.GraphPane;
 
-            // Set the Titles
             myPane.Title.Text = "Complex Impedance";
             myPane.XAxis.Title.Text = "Real";
             myPane.YAxis.Title.Text = "Imaginary";
@@ -554,15 +553,12 @@ namespace Instrumentation2020
 
 
         public void DoThisAllTheTime()
-        {
-            double x = 0.0;
-            
+        {            
             while (true)
             {
                 //you need to use Invoke because the new thread can't access the UI elements directly
                 Thread.Sleep(10);
                 MethodInvoker mi = delegate () {
-
                     updateGraph(zedGraphControl1, (double)(Control.MousePosition.X - 500) / 1000, (double)(Control.MousePosition.Y - 300) / 1000);
                 };
                 this.Invoke(mi);

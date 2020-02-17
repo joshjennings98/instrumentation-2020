@@ -210,6 +210,7 @@
             this.freqInput.Name = "freqInput";
             this.freqInput.Size = new System.Drawing.Size(276, 31);
             this.freqInput.TabIndex = 15;
+            this.freqInput.Text = "1000";
             this.freqInput.TextChanged += new System.EventHandler(this.freqInput_TextChanged);
             // 
             // Measure
