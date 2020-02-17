@@ -83,6 +83,7 @@ namespace Instrumentation2020
         private int currentFreq = 1000;
         private string currentWaveform = "Sinewave";
         private bool connectBool = false;
+        private int PGAGainValue = 1;
 
         public ComplexImpedanceAnalyser()
         {
@@ -104,6 +105,7 @@ namespace Instrumentation2020
             baudRateBox.SelectedIndex = 7;
             timeoutBox.SelectedIndex = 0;
             waveformbox.SelectedIndex = 0;
+            PGAGainBox.SelectedIndex = 0;
 
             rtfTerminal.Clear();
 
@@ -163,6 +165,22 @@ namespace Instrumentation2020
             }
 
             return bytes;
+        }
+
+        private byte[] formPGAGainMessage()
+        {
+            
+            byte[] id = { 0xFF, 0x05, 0x08 };
+            byte[] gain = { BitConverter.GetBytes(PGAGainValue)[0] };
+            byte[] empty = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+            byte[] data = CombineByteArrays(new[] { id, gain, empty });
+            byte[] message = CombineByteArrays(new[] { data, checksum(data) });
+
+            string x = BitConverter.ToString(message);
+            rtfTerminal.Text += "Sending message: " + x + "\n";
+
+            return message;
         }
 
         private byte[] formFreqMessage()
@@ -311,7 +329,10 @@ namespace Instrumentation2020
             currentFreq = 1000;
             currentWaveform = "Sinewave";
             waveformbox.SelectedIndex = 0;
+            PGAGainBox.SelectedIndex = 0;
             setFrequency(false);
+            PGAGainValue = 1;
+            setPGAGain();
     }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
@@ -328,6 +349,8 @@ namespace Instrumentation2020
                     baudRateBox.Enabled = false;
                     Measure.Enabled = true;
                     portNameBox.Enabled = false;
+                    PGAGainBox.Enabled = true;
+                    SETPGAGAINButton.Enabled = true;
 
                     rtfTerminal.Clear();
                     rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
@@ -379,6 +402,26 @@ namespace Instrumentation2020
             if (freqInput.Text != "" && int.TryParse(freqInput.Text, out _))
             {
                 currentFreq = Int32.Parse(freqInput.Text);
+            }
+        }
+
+        private void setPGAGain() {
+            if (!_serialPort.IsOpen)
+            {
+                rtfTerminal.Text += "Serial port not open.\n";
+            }
+            else
+            {
+                rtfTerminal.Text += "PGA Gain set to a " + PGAGainValue + ".\n";
+                byte[] message = formPGAGainMessage();
+                try
+                {
+                    _serialPort.Write(message, 0, message.Length);
+                }
+                catch (Exception ex)
+                {
+                    rtfTerminal.Text += "Set PGA Gain failed! \nError: " + ex.Message + "\n";
+                }
             }
         }
 
@@ -437,7 +480,19 @@ namespace Instrumentation2020
             Measure.Enabled = false;
             ConnectBtn.Text = "Connect";
             portNameBox.Enabled = true;
+            PGAGainBox.Enabled = false;
+            SETPGAGAINButton.Enabled = false;
             _serialPort.Close();
+        }
+
+        private void PGAGainBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PGAGainValue = Int32.Parse(PGAGainBox.Text);
+        }
+
+        private void SETPGAGAINButton_Click(object sender, EventArgs e)
+        {
+            setPGAGain();
         }
     }
 }
