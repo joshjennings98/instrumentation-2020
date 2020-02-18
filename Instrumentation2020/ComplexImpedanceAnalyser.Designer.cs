@@ -52,7 +52,17 @@
             this.rtfTerminal = new System.Windows.Forms.RichTextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.ImpedanceGraphTab = new System.Windows.Forms.TabPage();
+            this.DebugTab = new System.Windows.Forms.TabPage();
             this.gbPortSettings.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.ImpedanceGraphTab.SuspendLayout();
+            this.DebugTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbPortSettings
@@ -77,7 +87,7 @@
             this.gbPortSettings.Controls.Add(this.baudRateBox);
             this.gbPortSettings.Controls.Add(this.lblComPort);
             this.gbPortSettings.Controls.Add(this.lblBaudRate);
-            this.gbPortSettings.Location = new System.Drawing.Point(14, 299);
+            this.gbPortSettings.Location = new System.Drawing.Point(15, 651);
             this.gbPortSettings.Margin = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Name = "gbPortSettings";
             this.gbPortSettings.Padding = new System.Windows.Forms.Padding(6);
@@ -212,6 +222,7 @@
             this.freqInput.TabIndex = 15;
             this.freqInput.Text = "1000";
             this.freqInput.TextChanged += new System.EventHandler(this.freqInput_TextChanged);
+            this.freqInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.freqInput_KeyPress);
             // 
             // Measure
             // 
@@ -342,10 +353,10 @@
             this.rtfTerminal.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.rtfTerminal.Location = new System.Drawing.Point(14, 4);
+            this.rtfTerminal.Location = new System.Drawing.Point(6, 6);
             this.rtfTerminal.Margin = new System.Windows.Forms.Padding(6);
             this.rtfTerminal.Name = "rtfTerminal";
-            this.rtfTerminal.Size = new System.Drawing.Size(669, 283);
+            this.rtfTerminal.Size = new System.Drawing.Size(686, 571);
             this.rtfTerminal.TabIndex = 11;
             this.rtfTerminal.Text = "";
             this.rtfTerminal.TextChanged += new System.EventHandler(this.rtfTerminal_TextChanged);
@@ -360,7 +371,7 @@
             // 
             this.zedGraphControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.zedGraphControl1.Location = new System.Drawing.Point(708, 4);
+            this.zedGraphControl1.Location = new System.Drawing.Point(-34, 6);
             this.zedGraphControl1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.zedGraphControl1.Name = "zedGraphControl1";
             this.zedGraphControl1.ScrollGrace = 0D;
@@ -370,16 +381,75 @@
             this.zedGraphControl1.ScrollMinX = 0D;
             this.zedGraphControl1.ScrollMinY = 0D;
             this.zedGraphControl1.ScrollMinY2 = 0D;
-            this.zedGraphControl1.Size = new System.Drawing.Size(646, 627);
+            this.zedGraphControl1.Size = new System.Drawing.Size(683, 577);
             this.zedGraphControl1.TabIndex = 22;
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1,
+            this.toolStripStatusLabel2});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 987);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(694, 42);
+            this.statusStrip1.SizingGrip = false;
+            this.statusStrip1.TabIndex = 23;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Padding = new System.Windows.Forms.Padding(1173, 0, 0, 0);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(1411, 32);
+            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(238, 32);
+            this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
+            // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.ImpedanceGraphTab);
+            this.tabControl1.Controls.Add(this.DebugTab);
+            this.tabControl1.Location = new System.Drawing.Point(12, 12);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(674, 630);
+            this.tabControl1.TabIndex = 24;
+            // 
+            // ImpedanceGraphTab
+            // 
+            this.ImpedanceGraphTab.Controls.Add(this.zedGraphControl1);
+            this.ImpedanceGraphTab.Location = new System.Drawing.Point(8, 39);
+            this.ImpedanceGraphTab.Name = "ImpedanceGraphTab";
+            this.ImpedanceGraphTab.Padding = new System.Windows.Forms.Padding(3);
+            this.ImpedanceGraphTab.Size = new System.Drawing.Size(658, 583);
+            this.ImpedanceGraphTab.TabIndex = 0;
+            this.ImpedanceGraphTab.Text = "Impedance";
+            this.ImpedanceGraphTab.UseVisualStyleBackColor = true;
+            // 
+            // DebugTab
+            // 
+            this.DebugTab.Controls.Add(this.rtfTerminal);
+            this.DebugTab.Location = new System.Drawing.Point(8, 39);
+            this.DebugTab.Name = "DebugTab";
+            this.DebugTab.Padding = new System.Windows.Forms.Padding(3);
+            this.DebugTab.Size = new System.Drawing.Size(698, 583);
+            this.DebugTab.TabIndex = 1;
+            this.DebugTab.Text = "Debug";
+            this.DebugTab.UseVisualStyleBackColor = true;
             // 
             // ComplexImpedanceAnalyser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1424, 646);
-            this.Controls.Add(this.zedGraphControl1);
-            this.Controls.Add(this.rtfTerminal);
+            this.ClientSize = new System.Drawing.Size(694, 1029);
+            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.gbPortSettings);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(6);
@@ -389,7 +459,13 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.gbPortSettings.ResumeLayout(false);
             this.gbPortSettings.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.ImpedanceGraphTab.ResumeLayout(false);
+            this.DebugTab.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -417,6 +493,12 @@
         private System.Windows.Forms.Button SETPGAGAINButton;
         private System.Windows.Forms.Label RandomLabel;
         private ZedGraph.ZedGraphControl zedGraphControl1;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage ImpedanceGraphTab;
+        private System.Windows.Forms.TabPage DebugTab;
     }
 }
 

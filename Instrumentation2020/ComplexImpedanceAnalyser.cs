@@ -14,7 +14,7 @@ namespace Instrumentation2020
 {
     public partial class ComplexImpedanceAnalyser : Form
     {
-        System.Threading.Thread t;
+        Thread t;
 
         static SerialPort _serialPort;
         static bool _serialDataRxFlag;
@@ -131,7 +131,7 @@ namespace Instrumentation2020
             // Create a new SerialPort object with default settings.
             _serialPort = new SerialPort();
 
-            t = new System.Threading.Thread(DoThisAllTheTime);
+            t = new Thread(DoThisAllTheTime);
             t.Start();
         }
 
@@ -569,6 +569,19 @@ namespace Instrumentation2020
         {
             if (t.IsAlive) {
                 t.Abort();
+            }
+        }
+
+        private void toolStripProgressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void freqInput_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13)
+            {
+                setFrequency();
             }
         }
     }
