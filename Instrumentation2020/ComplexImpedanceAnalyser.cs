@@ -527,10 +527,10 @@ namespace Instrumentation2020
             myPane.XAxis.MajorGrid.IsVisible = true;
             myPane.YAxis.MajorGrid.IsVisible = true;
 
-            myPane.XAxis.Scale.Min = -1;
+            myPane.XAxis.Scale.Min = 0;
             myPane.XAxis.Scale.Max = 1;
 
-            myPane.YAxis.Scale.Min = -1;
+            myPane.YAxis.Scale.Min = 0;
             myPane.YAxis.Scale.Max = 1;
 
             myPane.YAxis.MajorGrid.IsZeroLine = true;
@@ -559,7 +559,7 @@ namespace Instrumentation2020
                 //you need to use Invoke because the new thread can't access the UI elements directly
                 Thread.Sleep(10);
                 MethodInvoker mi = delegate () {
-                    updateGraph(zedGraphControl1, (double)(Control.MousePosition.X - 500) / 1000, (double)(Control.MousePosition.Y - 300) / 1000);
+                    updateGraph(zedGraphControl1, (double)(Control.MousePosition.X) / Screen.PrimaryScreen.Bounds.Width, (double)(Screen.PrimaryScreen.Bounds.Height - Control.MousePosition.Y) / Screen.PrimaryScreen.Bounds.Height);
                 };
                 this.Invoke(mi);
             }
