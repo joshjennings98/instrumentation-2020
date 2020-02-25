@@ -57,12 +57,24 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define FB_SW3_Pin GPIO_PIN_13
+#define FB_SW3_GPIO_Port GPIOC
+#define FB_SW2_Pin GPIO_PIN_14
+#define FB_SW2_GPIO_Port GPIOC
+#define FB_SW1_Pin GPIO_PIN_15
+#define FB_SW1_GPIO_Port GPIOC
 #define PGA_CS_Pin GPIO_PIN_7
 #define PGA_CS_GPIO_Port GPIOC
 #define RED_LED_Pin GPIO_PIN_8
 #define RED_LED_GPIO_Port GPIOA
 #define GRN_LED_Pin GPIO_PIN_9
 #define GRN_LED_GPIO_Port GPIOA
+#define FB_SW6_Pin GPIO_PIN_13
+#define FB_SW6_GPIO_Port GPIOA
+#define FB_SW5_Pin GPIO_PIN_14
+#define FB_SW5_GPIO_Port GPIOA
+#define FB_SW4_Pin GPIO_PIN_15
+#define FB_SW4_GPIO_Port GPIOA
 #define AD9833_CS_Pin GPIO_PIN_6
 #define AD9833_CS_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
