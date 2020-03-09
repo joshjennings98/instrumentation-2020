@@ -34,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC_BUF_LEN 41
+#define ADC_BUF_LEN 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,6 +50,7 @@ SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
 
@@ -58,7 +59,6 @@ uint16_t registerValues[5]; // Buffer to store calculated SPI Tx to transmit to 
 bool updateSignalFreqFlag = false; // Flag to request AD9833 frequency update#
 
 uint8_t uartRxBytes[12]; // Buffer to store Recieved UART bytes
-
 
 uint8_t pgaGainValue; // Value to store current PGA gain
 bool updatePGAGainFlag = false; // Flag to request PGA gain update
@@ -78,7 +78,10 @@ uint16_t rawADC;
 // ADC stuff
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
-uint16_t adc_buf[ADC_BUF_LEN];
+uint16_t adc_buf[ADC_BUF_LEN][3];
+
+int waitCount = 0;
+uint32_t loopCounter = 0;
 
 /* USER CODE END PV */
 
@@ -91,6 +94,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 void UART_Rx_Handler(void);
 void AD9833_Set_Output(void);
@@ -138,6 +142,7 @@ int main(void)
   MX_TIM2_Init();
   MX_ADC1_Init();
   MX_SPI2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   // Set All SPI Periperal CS High
@@ -162,7 +167,9 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
 
   // Start ADC DMA thing
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, 3*ADC_BUF_LEN);
+
+  HAL_TIM_Base_Start_IT(&htim3);
 
   // Initialise filter
   /*
@@ -179,49 +186,7 @@ int main(void)
     actual attenuation = -40.28511284233681 dB
 
   */
-  static double filter_taps[ADC_BUF_LEN] = {
-    -0.020471781131228717,
-    -0.023991098974286657,
-    0.014422489930370508,
-    0.0603462959957095,
-    0.04967707225039325,
-    0.0004708285444206645,
-    -0.0073143250637859245,
-    0.026503860938436312,
-    0.02245622884323838,
-    -0.019740878251392393,
-    -0.01432410297619291,
-    0.03192513675259614,
-    0.017699469981087772,
-    -0.04069309748008898,
-    -0.016345345455220213,
-    0.06098164262015534,
-    0.017226748163479157,
-    -0.10412779068396433,
-    -0.017056389606946634,
-    0.3178056786209078,
-    0.5173439457035668,
-    0.3178056786209078,
-    -0.017056389606946634,
-    -0.10412779068396433,
-    0.017226748163479157,
-    0.06098164262015534,
-    -0.016345345455220213,
-    -0.04069309748008898,
-    0.017699469981087772,
-    0.03192513675259614,
-    -0.01432410297619291,
-    -0.019740878251392393,
-    0.02245622884323838,
-    0.026503860938436312,
-    -0.0073143250637859245,
-    0.0004708285444206645,
-    0.04967707225039325,
-    0.0603462959957095,
-    0.014422489930370508,
-    -0.023991098974286657,
-    -0.020471781131228717
-  };
+
 
 
   /* USER CODE END 2 */
@@ -235,6 +200,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  TIM3->CNT = 0;
+	  // Start loop timer
+
+	  rawADC = adc_buf[0][0];
 
 	  if (newCaptureValue){
 		 newCaptureValue = false;
@@ -251,30 +220,32 @@ int main(void)
 		  updatePGAGainFlag = false;
 	  }
 
-
-
-	  // Get ADC value
-	 //HAL_ADC_Start(&hadc1);
-	 //HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	 //firADC = HAL_ADC_GetValue(&hadc1);
-	  firADC = 0;
-	  int i = 0;
-	  while (adc_buf[i] > 0) {
-		  //firADC += (filter_taps[ADC_BUF_LEN - i] * (float)adc_buf[i]);
-
-		  firADC += (filter_taps[i] * (float)adc_buf[i]);
-		  //firADC += ((float)adc_buf[i] * (1.0 / 41.0));
-		  i++;
+	  // Toggle LED pin to show we're alive
+	  if (loopCounter % 2 == 0) {
+		  HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin);
+	  }
+	  if (loopCounter % 10 == 0) {
+		  HAL_GPIO_TogglePin(GRN_LED_GPIO_Port, GRN_LED_Pin);
+	  }
+	  if (loopCounter % 100 == 0) {
+		  // Send message
+		  float avgADCtemp = 0;
+		  for (int i = 0; i < ADC_BUF_LEN; i++) {
+			  avgADCtemp += adc_buf[i][2];
+		  }
+		  float vTemp = ((3.3*(avgADCtemp / ADC_BUF_LEN)/4096 - 0.76) / 25 + 25);
+		  asm("NOP");
 	  }
 
-	  rawADC = adc_buf[0];
-
-	  // Toggle LED pin to show we're alive
-	  HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin);
 
 	  // Arbitrary Loop Delay To stop spamming everything
-	  HAL_Delay(1000);
+	  //HAL_Delay(10);
 
+	  while (TIM3->CNT < 1000) {
+		  // Do nothing
+		  asm("NOP");
+	  }
+	  loopCounter++;
   }
   /* USER CODE END 3 */
 }
@@ -351,13 +322,13 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -369,6 +340,22 @@ static void MX_ADC1_Init(void)
   sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Rank = 2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Rank = 3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -519,6 +506,51 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 89;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 65335;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -585,8 +617,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, FB_SW3_Pin|FB_SW2_Pin|FB_SW1_Pin|PGA_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, RED_LED_Pin|GRN_LED_Pin|FB_SW6_Pin|FB_SW5_Pin 
-                          |FB_SW4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, RED_LED_Pin|GRN_LED_Pin|FB_SW4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
@@ -598,10 +629,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RED_LED_Pin GRN_LED_Pin FB_SW6_Pin FB_SW5_Pin 
-                           FB_SW4_Pin */
-  GPIO_InitStruct.Pin = RED_LED_Pin|GRN_LED_Pin|FB_SW6_Pin|FB_SW5_Pin 
-                          |FB_SW4_Pin;
+  /*Configure GPIO pins : RED_LED_Pin GRN_LED_Pin FB_SW4_Pin */
+  GPIO_InitStruct.Pin = RED_LED_Pin|GRN_LED_Pin|FB_SW4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -617,6 +646,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {

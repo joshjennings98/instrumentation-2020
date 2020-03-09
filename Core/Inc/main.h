@@ -42,6 +42,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 extern uint16_t registerValues[5];
+//extern int waitCount;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -69,10 +70,6 @@ void Error_Handler(void);
 #define RED_LED_GPIO_Port GPIOA
 #define GRN_LED_Pin GPIO_PIN_9
 #define GRN_LED_GPIO_Port GPIOA
-#define FB_SW6_Pin GPIO_PIN_13
-#define FB_SW6_GPIO_Port GPIOA
-#define FB_SW5_Pin GPIO_PIN_14
-#define FB_SW5_GPIO_Port GPIOA
 #define FB_SW4_Pin GPIO_PIN_15
 #define FB_SW4_GPIO_Port GPIOA
 #define AD9833_CS_Pin GPIO_PIN_6
