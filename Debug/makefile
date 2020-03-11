@@ -40,8 +40,8 @@ Instrumentation.bin \
 all: Instrumentation.elf secondary-outputs
 
 # Tool invocations
-Instrumentation.elf: $(OBJS) $(USER_OBJS) C:\Users\Josh\Documents\GitHub\InstrumentationEmbedded\STM32F446RETX_FLASH.ld
-	arm-none-eabi-gcc -o "Instrumentation.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Josh\Documents\GitHub\InstrumentationEmbedded\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Instrumentation.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Instrumentation.elf: $(OBJS) $(USER_OBJS) C:\Users\jackw\InstrumentationSoftware\embeddedSoftware\STM32F446RETX_FLASH.ld
+	arm-none-eabi-gcc -o "Instrumentation.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\jackw\InstrumentationSoftware\embeddedSoftware\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Instrumentation.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
