@@ -71,6 +71,7 @@ uint32_t counterDifference = 0;
 /* Capture index */
 uint16_t startedCounting = 0;
 bool newCaptureValue = false;
+bool ledOnFlag = false;
 
 float firADC;
 uint16_t rawADC;
@@ -156,7 +157,9 @@ int main(void)
   HAL_SPI_Transmit(&hspi1, (uint8_t*)resetValue, sizeof(resetValue)/sizeof(uint16_t), HAL_MAX_DELAY);
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_SET);
 
-
+  // Reset LEDS
+  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GRN_LED_GPIO_Port, GRN_LED_Pin, GPIO_PIN_RESET);
 
   // UART interrupts
   HAL_UART_Receive_IT(&huart2, (uint8_t*)uartRxBytes, 12);
@@ -172,20 +175,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim3);
 
   // Initialise filter
-  /*
-  sampling frequency: 4000 Hz
 
-  * 0 Hz - 1000 Hz
-    gain = 1
-    desired ripple = 5 dB
-    actual ripple = 4.036115307344851 dB
-
-  * 1100 Hz - 2000 Hz
-    gain = 0
-    desired attenuation = -40 dB
-    actual attenuation = -40.28511284233681 dB
-
-  */
 
 
 
@@ -211,22 +201,27 @@ int main(void)
 
 	  // Send Data Packets to AD9833
 	  if(updateSignalFreqFlag == true){
+		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
 		  AD9833_Set_Output();
 		  updateSignalFreqFlag = false;
 	  }
 	  // Update PGA Gain
 	  if(updatePGAGainFlag == true){
+		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
 		  PGA_Set_Gain();
 		  updatePGAGainFlag = false;
 	  }
 
 	  // Toggle LED pin to show we're alive
-	  if (loopCounter % 2 == 0) {
-		  HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin);
-	  }
-	  if (loopCounter % 10 == 0) {
+	  if (loopCounter % 1000 == 0) {
 		  HAL_GPIO_TogglePin(GRN_LED_GPIO_Port, GRN_LED_Pin);
+
+		  HAL_GPIO_TogglePin(FB_SW3_Pin, FB_SW3_GPIO_Port);
+		HAL_GPIO_TogglePin(FB_SW4_Pin, FB_SW4_GPIO_Port);
+		HAL_GPIO_TogglePin(GPIO_PIN_15, GPIOC);
+		HAL_GPIO_TogglePin(FB_SW2_Pin, FB_SW2_GPIO_Port);
 	  }
+
 	  if (loopCounter % 100 == 0) {
 		  // Send message
 		  float avgADCtemp = 0;
@@ -245,6 +240,7 @@ int main(void)
 		  // Do nothing
 		  asm("NOP");
 	  }
+	  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
 	  loopCounter++;
   }
   /* USER CODE END 3 */
