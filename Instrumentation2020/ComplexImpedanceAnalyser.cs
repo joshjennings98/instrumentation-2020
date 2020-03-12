@@ -295,8 +295,8 @@ namespace Instrumentation2020
         private byte[] formRelayMessage()
         {
 
-            byte[] id = { 0xFF, 0x02 };
-            byte[] empty = { toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            byte[] id = { 0xFF, 0x06 };
+            byte[] empty = { 0x08, toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
             byte[] data = CombineByteArrays(new[] { id, empty });
             byte[] message = CombineByteArrays(new[] { data, checksum(data) });
