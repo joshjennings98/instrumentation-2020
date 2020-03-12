@@ -87,7 +87,7 @@ namespace Instrumentation2020
         private string currentWaveform = "Sinewave";
         private bool connectBool = false;
         private int PGAGainValue = 1;
-        private int toggleRelayValue = 1;
+        private byte toggleRelayValue = 0x01;
         private byte statusFlag = 0x00;
         private int timeoutA = 0;
         private int magnitude = 0;
@@ -296,7 +296,7 @@ namespace Instrumentation2020
         {
 
             byte[] id = { 0xFF, 0x02 };
-            byte[] empty = { (byte)toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            byte[] empty = { toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
             byte[] data = CombineByteArrays(new[] { id, empty });
             byte[] message = CombineByteArrays(new[] { data, checksum(data) });
@@ -654,7 +654,30 @@ namespace Instrumentation2020
 
         private void ToggleRelayBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            toggleRelayValue = Int32.Parse(ToggleRelayBox.Text);
+            if (ToggleRelayBox.Text == "1")
+            {
+                toggleRelayValue = 0x01;
+            }
+            else if (ToggleRelayBox.Text == "2")
+            {
+                toggleRelayValue = 0x02;
+            }
+            else if (ToggleRelayBox.Text == "3")
+            {
+                toggleRelayValue = 0x03;
+            }
+            else if (ToggleRelayBox.Text == "4")
+            {
+                toggleRelayValue = 0x04;
+            }
+            else if (ToggleRelayBox.Text == "5")
+            {
+                toggleRelayValue = 0x05;
+            }
+            else if (ToggleRelayBox.Text == "6")
+            {
+                toggleRelayValue = 0x06;
+            }
             rtfTerminal.Text += "Selected relay set to " + toggleRelayValue + ".\n";
         }
 

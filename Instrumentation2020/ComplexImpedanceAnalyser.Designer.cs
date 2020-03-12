@@ -30,6 +30,9 @@
         {
             this.components = new System.ComponentModel.Container();
             this.gbPortSettings = new System.Windows.Forms.GroupBox();
+            this.ToggleRelayBox = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.PGAGainBox = new System.Windows.Forms.ComboBox();
             this.PGAGainLabel = new System.Windows.Forms.Label();
             this.SETPGAGAINButton = new System.Windows.Forms.Button();
@@ -58,9 +61,6 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.ToggleRelayBox = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             this.gbPortSettings.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.ImpedanceGraphTab.SuspendLayout();
@@ -93,13 +93,54 @@
             this.gbPortSettings.Controls.Add(this.lblComPort);
             this.gbPortSettings.Controls.Add(this.lblBaudRate);
             this.gbPortSettings.Location = new System.Drawing.Point(12, 652);
-            this.gbPortSettings.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.gbPortSettings.Margin = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Name = "gbPortSettings";
-            this.gbPortSettings.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.gbPortSettings.Padding = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Size = new System.Drawing.Size(674, 333);
             this.gbPortSettings.TabIndex = 5;
             this.gbPortSettings.TabStop = false;
             this.gbPortSettings.Text = "COM Serial Port Settings";
+            // 
+            // ToggleRelayBox
+            // 
+            this.ToggleRelayBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ToggleRelayBox.DropDownWidth = 67;
+            this.ToggleRelayBox.FormattingEnabled = true;
+            this.ToggleRelayBox.ItemHeight = 25;
+            this.ToggleRelayBox.Items.AddRange(new object[] {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"});
+            this.ToggleRelayBox.Location = new System.Drawing.Point(348, 279);
+            this.ToggleRelayBox.Margin = new System.Windows.Forms.Padding(6);
+            this.ToggleRelayBox.Name = "ToggleRelayBox";
+            this.ToggleRelayBox.Size = new System.Drawing.Size(148, 33);
+            this.ToggleRelayBox.TabIndex = 23;
+            this.ToggleRelayBox.SelectedIndexChanged += new System.EventHandler(this.ToggleRelayBox_SelectedIndexChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(342, 252);
+            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(139, 25);
+            this.label3.TabIndex = 21;
+            this.label3.Text = "Toggle Relay";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(512, 279);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(134, 38);
+            this.button1.TabIndex = 22;
+            this.button1.Text = "Set Relay";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // PGAGainBox
             // 
@@ -118,7 +159,7 @@
             "16",
             "32"});
             this.PGAGainBox.Location = new System.Drawing.Point(24, 279);
-            this.PGAGainBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.PGAGainBox.Margin = new System.Windows.Forms.Padding(6);
             this.PGAGainBox.Name = "PGAGainBox";
             this.PGAGainBox.Size = new System.Drawing.Size(148, 33);
             this.PGAGainBox.TabIndex = 20;
@@ -138,7 +179,7 @@
             // 
             this.SETPGAGAINButton.Enabled = false;
             this.SETPGAGAINButton.Location = new System.Drawing.Point(188, 279);
-            this.SETPGAGAINButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SETPGAGAINButton.Margin = new System.Windows.Forms.Padding(4);
             this.SETPGAGAINButton.Name = "SETPGAGAINButton";
             this.SETPGAGAINButton.Size = new System.Drawing.Size(134, 38);
             this.SETPGAGAINButton.TabIndex = 19;
@@ -158,7 +199,7 @@
             "Square wave",
             "Triangle wave"});
             this.waveformbox.Location = new System.Drawing.Point(324, 142);
-            this.waveformbox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.waveformbox.Margin = new System.Windows.Forms.Padding(6);
             this.waveformbox.Name = "waveformbox";
             this.waveformbox.Size = new System.Drawing.Size(184, 33);
             this.waveformbox.TabIndex = 18;
@@ -178,7 +219,7 @@
             // 
             this.freqencySetButton.Enabled = false;
             this.freqencySetButton.Location = new System.Drawing.Point(528, 142);
-            this.freqencySetButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.freqencySetButton.Margin = new System.Windows.Forms.Padding(4);
             this.freqencySetButton.Name = "freqencySetButton";
             this.freqencySetButton.Size = new System.Drawing.Size(134, 38);
             this.freqencySetButton.TabIndex = 16;
@@ -199,7 +240,7 @@
             // ConnectBtn
             // 
             this.ConnectBtn.Location = new System.Drawing.Point(176, 63);
-            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ConnectBtn.Margin = new System.Windows.Forms.Padding(4);
             this.ConnectBtn.Name = "ConnectBtn";
             this.ConnectBtn.Size = new System.Drawing.Size(146, 40);
             this.ConnectBtn.TabIndex = 14;
@@ -211,7 +252,7 @@
             // 
             this.freqInput.Enabled = false;
             this.freqInput.Location = new System.Drawing.Point(26, 142);
-            this.freqInput.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.freqInput.Margin = new System.Windows.Forms.Padding(4);
             this.freqInput.Name = "freqInput";
             this.freqInput.Size = new System.Drawing.Size(276, 31);
             this.freqInput.TabIndex = 15;
@@ -224,7 +265,7 @@
             this.Measure.Enabled = false;
             this.Measure.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Measure.Location = new System.Drawing.Point(24, 200);
-            this.Measure.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Measure.Margin = new System.Windows.Forms.Padding(6);
             this.Measure.Name = "Measure";
             this.Measure.Size = new System.Drawing.Size(298, 44);
             this.Measure.TabIndex = 12;
@@ -236,7 +277,7 @@
             // 
             this.resetbutton.Enabled = false;
             this.resetbutton.Location = new System.Drawing.Point(352, 200);
-            this.resetbutton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.resetbutton.Margin = new System.Windows.Forms.Padding(6);
             this.resetbutton.Name = "resetbutton";
             this.resetbutton.Size = new System.Drawing.Size(144, 44);
             this.resetbutton.TabIndex = 13;
@@ -248,7 +289,7 @@
             // 
             this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClear.Location = new System.Drawing.Point(528, 200);
-            this.btnClear.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnClear.Margin = new System.Windows.Forms.Padding(6);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(134, 44);
             this.btnClear.TabIndex = 10;
@@ -267,7 +308,7 @@
             "7000",
             "10000"});
             this.timeoutBox.Location = new System.Drawing.Point(360, 63);
-            this.timeoutBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.timeoutBox.Margin = new System.Windows.Forms.Padding(6);
             this.timeoutBox.Name = "timeoutBox";
             this.timeoutBox.Size = new System.Drawing.Size(134, 33);
             this.timeoutBox.TabIndex = 5;
@@ -297,7 +338,7 @@
             "COM5",
             "COM6"});
             this.portNameBox.Location = new System.Drawing.Point(26, 63);
-            this.portNameBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.portNameBox.Margin = new System.Windows.Forms.Padding(6);
             this.portNameBox.Name = "portNameBox";
             this.portNameBox.Size = new System.Drawing.Size(130, 33);
             this.portNameBox.TabIndex = 1;
@@ -317,7 +358,7 @@
             "57600",
             "115200"});
             this.baudRateBox.Location = new System.Drawing.Point(528, 63);
-            this.baudRateBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.baudRateBox.Margin = new System.Windows.Forms.Padding(6);
             this.baudRateBox.Name = "baudRateBox";
             this.baudRateBox.Size = new System.Drawing.Size(134, 33);
             this.baudRateBox.TabIndex = 3;
@@ -350,7 +391,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rtfTerminal.Location = new System.Drawing.Point(6, 6);
-            this.rtfTerminal.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.rtfTerminal.Margin = new System.Windows.Forms.Padding(6);
             this.rtfTerminal.Name = "rtfTerminal";
             this.rtfTerminal.Size = new System.Drawing.Size(646, 571);
             this.rtfTerminal.TabIndex = 11;
@@ -368,7 +409,7 @@
             this.zedGraphControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.zedGraphControl1.Location = new System.Drawing.Point(6, 6);
-            this.zedGraphControl1.Margin = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            this.zedGraphControl1.Margin = new System.Windows.Forms.Padding(12);
             this.zedGraphControl1.Name = "zedGraphControl1";
             this.zedGraphControl1.ScrollGrace = 0D;
             this.zedGraphControl1.ScrollMaxX = 0D;
@@ -385,7 +426,7 @@
             this.tabControl1.Controls.Add(this.ImpedanceGraphTab);
             this.tabControl1.Controls.Add(this.DebugTab);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(674, 631);
@@ -395,9 +436,9 @@
             // 
             this.ImpedanceGraphTab.Controls.Add(this.zedGraphControl1);
             this.ImpedanceGraphTab.Location = new System.Drawing.Point(8, 39);
-            this.ImpedanceGraphTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ImpedanceGraphTab.Margin = new System.Windows.Forms.Padding(4);
             this.ImpedanceGraphTab.Name = "ImpedanceGraphTab";
-            this.ImpedanceGraphTab.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ImpedanceGraphTab.Padding = new System.Windows.Forms.Padding(4);
             this.ImpedanceGraphTab.Size = new System.Drawing.Size(658, 584);
             this.ImpedanceGraphTab.TabIndex = 0;
             this.ImpedanceGraphTab.Text = "Impedance";
@@ -407,9 +448,9 @@
             // 
             this.DebugTab.Controls.Add(this.rtfTerminal);
             this.DebugTab.Location = new System.Drawing.Point(8, 39);
-            this.DebugTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.DebugTab.Margin = new System.Windows.Forms.Padding(4);
             this.DebugTab.Name = "DebugTab";
-            this.DebugTab.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.DebugTab.Padding = new System.Windows.Forms.Padding(4);
             this.DebugTab.Size = new System.Drawing.Size(658, 584);
             this.DebugTab.TabIndex = 1;
             this.DebugTab.Text = "Debug";
@@ -449,47 +490,6 @@
             this.statusStrip1.TabIndex = 23;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // ToggleRelayBox
-            // 
-            this.ToggleRelayBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ToggleRelayBox.DropDownWidth = 67;
-            this.ToggleRelayBox.FormattingEnabled = true;
-            this.ToggleRelayBox.ItemHeight = 25;
-            this.ToggleRelayBox.Items.AddRange(new object[] {
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6"});
-            this.ToggleRelayBox.Location = new System.Drawing.Point(348, 279);
-            this.ToggleRelayBox.Margin = new System.Windows.Forms.Padding(6);
-            this.ToggleRelayBox.Name = "ToggleRelayBox";
-            this.ToggleRelayBox.Size = new System.Drawing.Size(148, 33);
-            this.ToggleRelayBox.TabIndex = 23;
-            this.ToggleRelayBox.SelectedIndexChanged += new System.EventHandler(this.ToggleRelayBox_SelectedIndexChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(342, 252);
-            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(139, 25);
-            this.label3.TabIndex = 21;
-            this.label3.Text = "Toggle Relay";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(512, 279);
-            this.button1.Margin = new System.Windows.Forms.Padding(4);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(134, 38);
-            this.button1.TabIndex = 22;
-            this.button1.Text = "Toggle";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // ComplexImpedanceAnalyser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -499,7 +499,7 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.gbPortSettings);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "ComplexImpedanceAnalyser";
             this.Text = "Complex Impedance Analyser";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ComplexImpedanceAnalyser_FormClosing);
