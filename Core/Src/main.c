@@ -59,6 +59,8 @@ uint16_t registerValues[5]; // Buffer to store calculated SPI Tx to transmit to 
 bool updateSignalFreqFlag = false; // Flag to request AD9833 frequency update#
 
 uint8_t uartRxBytes[12]; // Buffer to store Recieved UART bytes
+uint8_t uartTxBytes[12] = {0xFF, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00};
+
 
 uint8_t pgaGainValue; // Value to store current PGA gain
 bool updatePGAGainFlag = false; // Flag to request PGA gain update
@@ -72,9 +74,13 @@ uint32_t counterDifference = 0;
 uint16_t startedCounting = 0;
 bool newCaptureValue = false;
 bool ledOnFlag = false;
+measureFlag = false;
 
 float firADC;
 uint16_t rawADC;
+
+uint32_t impedanceMag = 0;
+uint32_t impedancePhase = 0;
 
 // ADC stuff
 ADC_HandleTypeDef hadc1;
@@ -83,6 +89,7 @@ uint16_t adc_buf[ADC_BUF_LEN][3];
 
 int waitCount = 0;
 uint32_t loopCounter = 0;
+uint8_t sysCount = 0;
 
 /* USER CODE END PV */
 
@@ -101,6 +108,12 @@ void UART_Rx_Handler(void);
 void AD9833_Set_Output(void);
 void PGA_Set_Gain(void);
 bool CalculateRxDataChecksum(void);
+uint8_t makeCheckSum(void);
+uint32_t measureImpedanceMagnitude(void);
+uint32_t measureImpedancePhase(void);
+void sendImpedanceMessage(uint32_t mag, uint32_t phase);
+void toggleRelay(uint8_t relay);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -216,13 +229,21 @@ int main(void)
 		  updatePGAGainFlag = false;
 	  }
 
+	  if(measureFlag == true){
+		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+		  impedanceMag = measureImpedanceMagnitude();
+		  impedancePhase = measureImpedancePhase();
+		  sendImpedanceMessage(impedanceMag, impedancePhase);
+		  measureFlag = false;
+	  }
+
 	  // Toggle LED pin to show we're alive
 	  if (loopCounter % 1000 == 0) {
 		  HAL_GPIO_TogglePin(GRN_LED_GPIO_Port, GRN_LED_Pin);
-
+		  sysCount++;
 	  }
 
-	  if (loopCounter % 100 == 0) {
+	  if (loopCounter % 2000 == 0) {
 		  // Send message
 		  float avgADCtemp = 0;
 		  for (int i = 0; i < ADC_BUF_LEN; i++) {
@@ -230,7 +251,12 @@ int main(void)
 		  }
 		  float vTemp = ((3.3*(avgADCtemp / ADC_BUF_LEN)/4096 - 0.76) / 25 + 25);
 		  asm("NOP");
-		  //HAL_UART_Transmit(&huart2,
+		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+		  uartTxBytes[1] = 0x01;
+		  uartTxBytes[3] = sysCount;
+		  uint8_t checksum = makeCheckSum();
+		  uartTxBytes[11] = checksum;
+		  HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBytes, 12, 1);
 	  }
 
 
@@ -243,6 +269,7 @@ int main(void)
 	  }
 	  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
 	  loopCounter++;
+
   }
   /* USER CODE END 3 */
 }
@@ -647,6 +674,62 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+uint32_t measureImpedanceMagnitude(void) {
+	int x = rand() % 100;
+	return x;
+}
+
+uint32_t measureImpedancePhase(void) {
+	int x = rand() % 90;
+	return x;
+}
+
+void sendImpedanceMessage(uint32_t mag, uint32_t phase) {
+	uartTxBytes[1] = 0x03;
+
+
+	uartTxBytes[3] = mag & 0xFF;
+	uartTxBytes[4] = (mag & 0xFF00) / 0xFF;
+	uartTxBytes[5] = (mag & 0xFF0000) / 0xFFFF;
+	uartTxBytes[6] = (mag & 0xFF000000) / 0xFFFFFF;
+
+	uartTxBytes[7] = phase & 0xFF;
+	uartTxBytes[8] = (phase & 0xFF00) / 0xFF;
+	uartTxBytes[9] = (phase & 0xFF0000) / 0xFFFF;
+	uartTxBytes[10] = (phase & 0xFF000000) / 0xFFFFFF;
+
+	uint8_t checksum = makeCheckSum();
+	uartTxBytes[11] = checksum;
+	HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBytes, 12, 1);
+	measureFlag = false;
+}
+
+void toggleRelay(uint8_t relay) {
+	switch(relay)
+		{
+		case(0x01):
+				HAL_GPIO_TogglePin(FB_SW1_GPIO_Port, FB_SW1_Pin);
+				break;
+		case(0x02):
+				HAL_GPIO_TogglePin(FB_SW2_GPIO_Port, FB_SW2_Pin);
+				break;
+		case(0x03):
+				HAL_GPIO_TogglePin(FB_SW3_GPIO_Port, FB_SW3_Pin);
+				break;
+		case(0x04):
+				HAL_GPIO_TogglePin(FB_SW4_GPIO_Port, FB_SW4_Pin);
+				break;
+		case(0x04):
+				HAL_GPIO_TogglePin(FB_SW5_GPIO_Port, FB_SW5_Pin);
+				break;
+		case(0x04):
+				HAL_GPIO_TogglePin(FB_SW6_GPIO_Port, FB_SW6_Pin);
+				break;
+		default:
+			break;
+		}
+}
+
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
@@ -710,7 +793,7 @@ void UART_Rx_Handler(void)
 	case(0x01):
 			break;
 	case(0x02):
-			break;
+			measureFlag = true;
 	case(0x04): // frequency change message
 			freq = uartRxBytes[6] | ((int)uartRxBytes[5] << 8) | ((int)uartRxBytes[4] << 16) | ((int)uartRxBytes[3] << 24);
 			signal = uartRxBytes[10] | ((int)uartRxBytes[9] << 8) | ((int)uartRxBytes[8] << 16) | ((int)uartRxBytes[7] << 24);
@@ -721,9 +804,21 @@ void UART_Rx_Handler(void)
 	case(0x05): // set PGA gain message
 			pgaGainValue = uartRxBytes[3];
 			updatePGAGainFlag = true;
+	case(0x06): // toggle relay
+			toggleRelay(uartRxBytes[3]);
 	default:
 		break;
 	}
+}
+
+uint8_t makeCheckSum(void) {
+	uint8_t result = 0;
+
+	int i;
+	// Checksum is bitwise xor of all bytes except checksum
+	for(i = 0; i < (sizeof(uartTxBytes)/sizeof(uint8_t) - 1); i++)
+		result = result ^ uartTxBytes[i];
+	return result;
 }
 
 bool CalculateRxDataChecksum(void)
