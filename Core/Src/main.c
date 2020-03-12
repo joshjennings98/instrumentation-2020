@@ -256,7 +256,7 @@ int main(void)
 		  uartTxBytes[3] = sysCount;
 		  uint8_t checksum = makeCheckSum();
 		  uartTxBytes[11] = checksum;
-		  HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBytes, 12, 1);
+		  //HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBytes, 12, 1);
 	  }
 
 
@@ -708,22 +708,52 @@ void toggleRelay(uint8_t relay) {
 	switch(relay)
 		{
 		case(0x01):
-				HAL_GPIO_TogglePin(FB_SW1_GPIO_Port, FB_SW1_Pin);
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
+		  	  	HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
+		  	  	HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
+		  	  	HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
+		  	  	HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
+		  	  	HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_SET);
 				break;
 		case(0x02):
-				HAL_GPIO_TogglePin(FB_SW2_GPIO_Port, FB_SW2_Pin);
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x03):
-				HAL_GPIO_TogglePin(FB_SW3_GPIO_Port, FB_SW3_Pin);
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x04):
-				HAL_GPIO_TogglePin(FB_SW4_GPIO_Port, FB_SW4_Pin);
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
-		case(0x04):
-				HAL_GPIO_TogglePin(FB_SW5_GPIO_Port, FB_SW5_Pin);
+		case(0x05):
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
-		case(0x04):
-				HAL_GPIO_TogglePin(FB_SW6_GPIO_Port, FB_SW6_Pin);
+		case(0x06):
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		default:
 			break;
