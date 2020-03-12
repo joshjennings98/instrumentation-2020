@@ -639,7 +639,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, FB_SW3_Pin|FB_SW1_Pin|FB_SW2_Pin|PGA_CS_Pin 
-                          |FB_SW6_Pin|FB_SW5_Pin, GPIO_PIN_RESET);
+                          |FB_SW5_Pin|FB_SW6_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, RED_LED_Pin|GRN_LED_Pin|FB_SW4_Pin, GPIO_PIN_RESET);
@@ -648,9 +648,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : FB_SW3_Pin FB_SW1_Pin FB_SW2_Pin PGA_CS_Pin 
-                           FB_SW6_Pin FB_SW5_Pin */
+                           FB_SW5_Pin FB_SW6_Pin */
   GPIO_InitStruct.Pin = FB_SW3_Pin|FB_SW1_Pin|FB_SW2_Pin|PGA_CS_Pin 
-                          |FB_SW6_Pin|FB_SW5_Pin;
+                          |FB_SW5_Pin|FB_SW6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

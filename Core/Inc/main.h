@@ -72,10 +72,10 @@ void Error_Handler(void);
 #define GRN_LED_GPIO_Port GPIOA
 #define FB_SW4_Pin GPIO_PIN_15
 #define FB_SW4_GPIO_Port GPIOA
-#define FB_SW6_Pin GPIO_PIN_10
-#define FB_SW6_GPIO_Port GPIOC
-#define FB_SW5_Pin GPIO_PIN_12
+#define FB_SW5_Pin GPIO_PIN_10
 #define FB_SW5_GPIO_Port GPIOC
+#define FB_SW6_Pin GPIO_PIN_12
+#define FB_SW6_GPIO_Port GPIOC
 #define AD9833_CS_Pin GPIO_PIN_6
 #define AD9833_CS_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
