@@ -174,10 +174,14 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim3);
 
-  // Initialise filter
+  // Set relays low
 
-
-
+  HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 
   /* USER CODE END 2 */
  
@@ -216,13 +220,6 @@ int main(void)
 	  if (loopCounter % 1000 == 0) {
 		  HAL_GPIO_TogglePin(GRN_LED_GPIO_Port, GRN_LED_Pin);
 
-		  HAL_GPIO_TogglePin(FB_SW6_GPIO_Port, FB_SW6_Pin);
-		  HAL_GPIO_TogglePin(FB_SW5_GPIO_Port, FB_SW5_Pin);
-		  HAL_GPIO_TogglePin(FB_SW4_GPIO_Port, FB_SW4_Pin);
-		  HAL_GPIO_TogglePin(FB_SW3_GPIO_Port, FB_SW3_Pin);
-		  HAL_GPIO_TogglePin(FB_SW2_GPIO_Port, FB_SW2_Pin);
-		  HAL_GPIO_TogglePin(FB_SW1_GPIO_Port, FB_SW1_Pin);
-
 	  }
 
 	  if (loopCounter % 100 == 0) {
@@ -233,6 +230,7 @@ int main(void)
 		  }
 		  float vTemp = ((3.3*(avgADCtemp / ADC_BUF_LEN)/4096 - 0.76) / 25 + 25);
 		  asm("NOP");
+		  //HAL_UART_Transmit(&huart2,
 	  }
 
 
