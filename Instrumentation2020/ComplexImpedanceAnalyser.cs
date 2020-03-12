@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO.Ports;
+using System.Timers;
 using ZedGraph;
 
 namespace Instrumentation2020
@@ -86,6 +87,12 @@ namespace Instrumentation2020
         private string currentWaveform = "Sinewave";
         private bool connectBool = false;
         private int PGAGainValue = 1;
+        private int toggleRelayValue = 1;
+        private byte statusFlag = 0x00;
+        private int timeoutA = 0;
+        private int magnitude = 0;
+        private int phase = 0;
+        private bool receivedMeasureFlag = false;
 
         public ComplexImpedanceAnalyser()
         {
@@ -108,6 +115,7 @@ namespace Instrumentation2020
             timeoutBox.SelectedIndex = 0;
             waveformbox.SelectedIndex = 0;
             PGAGainBox.SelectedIndex = 0;
+            ToggleRelayBox.SelectedIndex = 0;
 
             rtfTerminal.Clear();
 
@@ -242,70 +250,73 @@ namespace Instrumentation2020
 
         private string readSerialEvent()
         {
-            string data = "";
-            var done = new Dictionary<int, Message>();
+            return "";
+        }
 
-            try
-            {
-                var startTime = DateTime.UtcNow;
-                var timeout = TimeSpan.FromMilliseconds(Convert.ToDouble(timeoutBox.Text)); // Calculate once for efficiency
-                // Assuming data is a 12 byte string |FF|id|datatype|data|checksum|                
-                // Want all the information, so repeat until you have everything or you timeout
-                while (done.Count < numParams && DateTime.UtcNow - startTime < timeout) // Make sure it times out
-                {
-                    if (_serialDataRxFlag) { // If Data has been recieved
-                        // Convert into message form
-                        Message msg = new Message(_serialRxBuffer);
-                        
-                        // Only add it to map if it isn't already in there
-                        if (!done.ContainsKey(msg.ID)) {
-                            done.Add(msg.ID, msg);
-                        }
+        private byte[] formSendMeasureMessage()
+        {
 
-                        _serialDataRxFlag = false;
-                    }
-                }
+            byte[] id = { 0xFF, 0x02};
+            byte[] empty = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-                if (DateTime.UtcNow - startTime > timeout)
-                {
-                    if (done.Count != 0)
-                    {
-                        data += _serialPort.PortName + " timed out but returned the following data:\n";
-                    } 
-                    else
-                    {
-                        data = _serialPort.PortName + " timed out and returned no data.";
-                    }
-                }
+            byte[] data = CombineByteArrays(new[] { id, empty });
+            byte[] message = CombineByteArrays(new[] { data, checksum(data) });
 
-                // Make it pretty
-                foreach (KeyValuePair<int, Message> message in done)
-                {
-                    data += message.Value.prettyVersion;
-                }
-            }
-            catch (TimeoutException)
-            {
-                data = _serialPort.PortName + " timed out and returned no data.";
-            }
-            return data;
+            return message;
         }
 
         private void Measure_Click(object sender, EventArgs e)
         {
-            // Set the timeout and open the port
-            _serialPort.ReadTimeout = Int32.Parse(timeoutBox.Text);
-            // Try and read the serial port data
-            string message = readSerialEvent();
-
-            // Write the data and close the port
-            rtfTerminal.Text += message + "\n";
+            if (!_serialPort.IsOpen)
+            {
+                rtfTerminal.Text += "Serial port not open.\n";
+            }
+            else
+            {
+                byte[] message = formSendMeasureMessage();
+                try
+                {
+                    Measure.Enabled = false;
+                    _serialPort.Write(message, 0, message.Length);
+                }
+                catch (Exception ex)
+                {
+                    rtfTerminal.Text += "Measure failed! \nError: " + ex.Message + "\n";
+                }
+            }
         }
 
         private void changeTimeOut()
         {
             // Read and set timeout data
             rtfTerminal.Text += "Port timeout set to " + timeoutBox.Text + "ms.\n";
+        }
+
+        private byte[] formRelayMessage()
+        {
+
+            byte[] id = { 0xFF, 0x02 };
+            byte[] empty = { (byte)toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+            byte[] data = CombineByteArrays(new[] { id, empty });
+            byte[] message = CombineByteArrays(new[] { data, checksum(data) });
+
+            return message;
+        }
+
+        private void changeRelay()
+        {           
+
+            byte[] message = formRelayMessage();
+
+            try
+            {
+                _serialPort.Write(message, 0, message.Length);
+            }
+            catch (Exception ex)
+            {
+                rtfTerminal.Text += "Failed to toggle relay! \nError: " + ex.Message + "\n";
+            }
         }
 
         private void timeoutBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -341,6 +352,9 @@ namespace Instrumentation2020
             setFrequency(false);
             PGAGainValue = 1;
             setPGAGain();
+            magnitude = 0;
+            phase = 0;
+            Measure.Enabled = true;
     }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
@@ -352,7 +366,7 @@ namespace Instrumentation2020
                     changePort();
                     _serialDataRxFlag = false;
                     _serialPort.Open();
-                    _serialPort.ReceivedBytesThreshold = 1;
+                    _serialPort.ReceivedBytesThreshold = 12;
                     _serialPort.DataReceived += _serialPort_DataReceived;
                     baudRateBox.Enabled = false;
                     Measure.Enabled = true;
@@ -385,7 +399,12 @@ namespace Instrumentation2020
 
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            byte header = (byte)_serialPort.ReadByte();
+            byte header = 0;
+            do
+            {
+                header = (byte)_serialPort.ReadByte();
+            } while (header != 0xFF && _serialPort.BytesToRead > 0);
+            
 
             if (header == 0xFF)
             {
@@ -404,10 +423,22 @@ namespace Instrumentation2020
                 _serialRxBuffer = buffer;
                 // Set a message recieved flag
                 _serialDataRxFlag = true;
+               
+                if (_serialRxBuffer[1] == 0x01)
+                {
+                    statusFlag = _serialRxBuffer[3];
+                }
+                if (_serialRxBuffer[1] == 0x03)
+                {
+
+                    magnitude = BitConverter.ToInt32(_serialRxBuffer.Skip(3).Take(4).ToArray(), 0);
+                    phase = BitConverter.ToInt32(_serialRxBuffer.Skip(7).Take(4).ToArray(), 0);
+                    receivedMeasureFlag = true;
+                }
             }
 
             else {
-                _serialPort.DiscardInBuffer();
+               // _serialPort.DiscardInBuffer();
             };
         }
 
@@ -524,14 +555,14 @@ namespace Instrumentation2020
             myPane.XAxis.Title.Text = "Real";
             myPane.YAxis.Title.Text = "Imaginary";
 
-            myPane.XAxis.MajorGrid.IsVisible = true;
-            myPane.YAxis.MajorGrid.IsVisible = true;
+            //myPane.XAxis.MajorGrid.IsVisible = true;
+            //myPane.YAxis.MajorGrid.IsVisible = true;
 
             myPane.XAxis.Scale.Min = 0;
-            myPane.XAxis.Scale.Max = 1;
+            myPane.XAxis.Scale.Max = 100;
 
             myPane.YAxis.Scale.Min = 0;
-            myPane.YAxis.Scale.Max = 1;
+            myPane.YAxis.Scale.Max = 100;
 
             myPane.YAxis.MajorGrid.IsZeroLine = true;
             myPane.XAxis.MajorGrid.IsZeroLine = true;
@@ -559,7 +590,9 @@ namespace Instrumentation2020
                 //you need to use Invoke because the new thread can't access the UI elements directly
                 Thread.Sleep(10);
                 MethodInvoker mi = delegate () {
-                    updateGraph(zedGraphControl1, (double)(Control.MousePosition.X) / Screen.PrimaryScreen.Bounds.Width, (double)(Screen.PrimaryScreen.Bounds.Height - Control.MousePosition.Y) / Screen.PrimaryScreen.Bounds.Height);
+                    //updateGraph(zedGraphControl1, (double)(Control.MousePosition.X) / Screen.PrimaryScreen.Bounds.Width, (double)(Screen.PrimaryScreen.Bounds.Height - Control.MousePosition.Y) / Screen.PrimaryScreen.Bounds.Height);
+                    double phaseRad = phase * Math.PI / 180.0;
+                    updateGraph(zedGraphControl1, magnitude * Math.Cos(phaseRad), magnitude * Math.Sin(phaseRad));
                 };
                 this.Invoke(mi);
             }
@@ -583,6 +616,51 @@ namespace Instrumentation2020
             {
                 setFrequency();
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (statusFlag != 0x00)
+            {
+                rtfTerminal.Text += "syscount: " + statusFlag + ".\n";
+                statusFlag = 0x00;
+                timeoutA = 0;
+            }
+            timeoutA += 1;
+            if (timeoutA > 5)
+            {
+                rtfTerminal.Text += "Lost connection.\n";
+            }
+            if (receivedMeasureFlag)
+            {
+                rtfTerminal.Text += "Magnitude: " + magnitude + ".\n";
+                rtfTerminal.Text += "Phase: " + phase + ".\n";
+                receivedMeasureFlag = false;
+                Measure.Enabled = true;
+            }
+        }
+
+        private void resetTimer()
+        {
+            timer1.Stop();
+            timer1.Start();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            //Test
+            resetTimer();
+        }
+
+        private void ToggleRelayBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            toggleRelayValue = Int32.Parse(ToggleRelayBox.Text);
+            rtfTerminal.Text += "Selected relay set to " + toggleRelayValue + ".\n";
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            changeRelay();
         }
     }
 }
