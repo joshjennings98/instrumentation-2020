@@ -101,10 +101,10 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_TIM2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void UART_Rx_Handler(void);
 void AD9833_Set_Output(void);
@@ -155,10 +155,10 @@ int main(void)
   MX_DMA_Init();
   MX_SPI1_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
   MX_ADC1_Init();
   MX_SPI2_Init();
   MX_TIM3_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   // Set All SPI Periperal CS High
@@ -181,13 +181,14 @@ int main(void)
   //HAL_UART_Receive_DMA(&huart2, (uint8_t*)uartRxBytes, 1);
 
   // Start timer interrupts
-  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
+  //HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+  //HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
 
   // Start ADC DMA thing
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, 3*ADC_BUF_LEN);
 
   HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim2);
 
   // Set relays low
 
@@ -480,7 +481,6 @@ static void MX_TIM2_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
@@ -500,30 +500,13 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
-  {
-    Error_Handler();
-  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
-  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 15;
-  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN TIM2_Init 2 */
-
 
   /* USER CODE END TIM2_Init 2 */
 
@@ -656,6 +639,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PA0 PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pins : RED_LED_Pin GRN_LED_Pin FB_SW4_Pin */
   GPIO_InitStruct.Pin = RED_LED_Pin|GRN_LED_Pin|FB_SW4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -777,38 +766,16 @@ void toggleRelay(uint8_t relay) {
 		}
 }
 
-
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+void EXTI0_IRQHandler(void)
 {
-  if (htim->Instance==TIM2) {
-	/*
-		This works if you set channel 1 then channel 2 of the timer.
-		You can set channel 1 twice but then the difference will be wrong.
-		The reading will be 0xFFFFFFFF - CounterOneValue since CounterTwoValue = 0.
-	*/
-	if(startedCounting == 0) {
-      // Get the 1st Input Capture value
-      CounterOneValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-      startedCounting = 1;
-    }
-    else {
-      // Get the 2nd Input Capture value
-      CounterTwoValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+	TIM2->CNT = 0;
+}
 
-      // Timer difference computation
-	  if (CounterTwoValue > CounterOneValue) {
-		counterDifference = (CounterTwoValue - CounterOneValue);
-	  }
-	  else { // (CounterTwoValue <= CounterOneValue)
-		counterDifference = ((0xFFFFFFFF - CounterOneValue) + CounterTwoValue);
-	  }
-	  // Set flags
-	  startedCounting = 0;
-	  newCaptureValue = true;
-
-	  //TIM2->CNT = 0;
-    }
-  }
+void EXTI1_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+	counterDifference = TIM2->CNT;
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
