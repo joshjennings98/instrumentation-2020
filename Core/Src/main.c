@@ -76,6 +76,8 @@ bool newCaptureValue = false;
 bool ledOnFlag = false;
 measureFlag = false;
 
+long refSignalFrequency = 0;
+
 float firADC;
 uint16_t rawADC;
 
@@ -209,8 +211,6 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  TIM3->CNT = 0;
 	  // Start loop timer
-
-	  rawADC = adc_buf[0][0];
 
 	  if (newCaptureValue){
 		 newCaptureValue = false;
@@ -675,13 +675,24 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 uint32_t measureImpedanceMagnitude(void) {
-	int x = rand() % 100;
-	return x;
+	float adcMean = 0;
+	for (int i = 0; i < ADC_BUF_LEN; i++) {
+	  adcMean += adc_buf[i][0];
+	}
+	adcMean /= (float)ADC_BUF_LEN;
+
+	return (uint32_t)adcMean;
 }
 
 uint32_t measureImpedancePhase(void) {
-	int x = rand() % 90;
-	return x;
+	int freq = refSignalFrequency;
+	double period = 1.0 / (double)freq;
+
+	double periodTicks = (period * 180000000);
+	double count = (double) counterDifference;
+	uint32_t phase = (uint32_t)(360.0 * count / periodTicks);
+
+	return phase;
 }
 
 void sendImpedanceMessage(uint32_t mag, uint32_t phase) {
@@ -708,40 +719,40 @@ void toggleRelay(uint8_t relay) {
 	switch(relay)
 		{
 		case(0x01):
+				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 		  	  	HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 		  	  	HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
 		  	  	HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
 		  	  	HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
-		  	  	HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_SET);
 				break;
 		case(0x02):
+				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x03):
+				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x04):
+				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x05):
-				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
@@ -830,6 +841,7 @@ void UART_Rx_Handler(void)
 			AD9833CalculateRegister(freq, signal);
 			// Set Update Frequency Flag so AD9833 updates in main task loop
 			updateSignalFreqFlag = true;
+			refSignalFrequency = freq;
 			break;
 	case(0x05): // set PGA gain message
 			pgaGainValue = uartRxBytes[3];
