@@ -380,6 +380,9 @@ namespace Instrumentation2020
                     waveformbox.Enabled = true;
                     resetbutton.Enabled = true;
 
+                    button1.Enabled = true;
+                    ToggleRelayBox.Enabled = true;
+
                     rtfTerminal.Clear();
                     rtfTerminal.Text += "Connected to " + _serialPort.PortName + " with a baud rate of " + _serialPort.BaudRate.ToString() + ".\n";
 
@@ -534,6 +537,8 @@ namespace Instrumentation2020
             timeoutBox.Enabled = false;
             waveformbox.Enabled = false;
             resetbutton.Enabled = false;
+            button1.Enabled = false;
+            ToggleRelayBox.Enabled = false;
         }
 
         private void PGAGainBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -560,9 +565,11 @@ namespace Instrumentation2020
 
             myPane.XAxis.Scale.Min = 0;
             myPane.XAxis.Scale.Max = 100;
+            myPane.XAxis.Scale.MajorStep = 10;
 
             myPane.YAxis.Scale.Min = 0;
             myPane.YAxis.Scale.Max = 100;
+            myPane.YAxis.Scale.MajorStep = 10;
 
             myPane.YAxis.MajorGrid.IsZeroLine = true;
             myPane.XAxis.MajorGrid.IsZeroLine = true;
@@ -629,12 +636,13 @@ namespace Instrumentation2020
             timeoutA += 1;
             if (timeoutA > 5)
             {
-                rtfTerminal.Text += "Lost connection.\n";
+                //rtfTerminal.Text += "No connection.\n";
             }
             if (receivedMeasureFlag)
             {
                 rtfTerminal.Text += "Magnitude: " + magnitude + ".\n";
                 rtfTerminal.Text += "Phase: " + phase + ".\n";
+                measurementValueLabel.Text = "Impedance: " + magnitude + "∠" + phase;
                 receivedMeasureFlag = false;
                 Measure.Enabled = true;
             }
@@ -654,27 +662,27 @@ namespace Instrumentation2020
 
         private void ToggleRelayBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ToggleRelayBox.Text == "1")
+            if (ToggleRelayBox.Text == "1M")
             {
                 toggleRelayValue = 0x01;
             }
-            else if (ToggleRelayBox.Text == "2")
+            else if (ToggleRelayBox.Text == "100k")
             {
                 toggleRelayValue = 0x02;
             }
-            else if (ToggleRelayBox.Text == "3")
+            else if (ToggleRelayBox.Text == "10k")
             {
                 toggleRelayValue = 0x03;
             }
-            else if (ToggleRelayBox.Text == "4")
+            else if (ToggleRelayBox.Text == "1k")
             {
                 toggleRelayValue = 0x04;
             }
-            else if (ToggleRelayBox.Text == "5")
+            else if (ToggleRelayBox.Text == "100")
             {
                 toggleRelayValue = 0x05;
             }
-            else if (ToggleRelayBox.Text == "6")
+            else if (ToggleRelayBox.Text == "10")
             {
                 toggleRelayValue = 0x06;
             }

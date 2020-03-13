@@ -58,14 +58,11 @@
             this.ImpedanceGraphTab = new System.Windows.Forms.TabPage();
             this.DebugTab = new System.Windows.Forms.TabPage();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.measurementValueLabel = new System.Windows.Forms.Label();
             this.gbPortSettings.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.ImpedanceGraphTab.SuspendLayout();
             this.DebugTab.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbPortSettings
@@ -92,32 +89,33 @@
             this.gbPortSettings.Controls.Add(this.baudRateBox);
             this.gbPortSettings.Controls.Add(this.lblComPort);
             this.gbPortSettings.Controls.Add(this.lblBaudRate);
-            this.gbPortSettings.Location = new System.Drawing.Point(12, 652);
+            this.gbPortSettings.Location = new System.Drawing.Point(12, 725);
             this.gbPortSettings.Margin = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Name = "gbPortSettings";
             this.gbPortSettings.Padding = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Size = new System.Drawing.Size(674, 333);
             this.gbPortSettings.TabIndex = 5;
             this.gbPortSettings.TabStop = false;
-            this.gbPortSettings.Text = "COM Serial Port Settings";
+            this.gbPortSettings.Text = "Analyser Settings";
             // 
             // ToggleRelayBox
             // 
             this.ToggleRelayBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ToggleRelayBox.DropDownWidth = 67;
+            this.ToggleRelayBox.Enabled = false;
             this.ToggleRelayBox.FormattingEnabled = true;
             this.ToggleRelayBox.ItemHeight = 25;
             this.ToggleRelayBox.Items.AddRange(new object[] {
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6"});
+            "10",
+            "100",
+            "1k",
+            "10k",
+            "100k",
+            "1M"});
             this.ToggleRelayBox.Location = new System.Drawing.Point(348, 279);
             this.ToggleRelayBox.Margin = new System.Windows.Forms.Padding(6);
             this.ToggleRelayBox.Name = "ToggleRelayBox";
-            this.ToggleRelayBox.Size = new System.Drawing.Size(148, 33);
+            this.ToggleRelayBox.Size = new System.Drawing.Size(133, 33);
             this.ToggleRelayBox.TabIndex = 23;
             this.ToggleRelayBox.SelectedIndexChanged += new System.EventHandler(this.ToggleRelayBox_SelectedIndexChanged);
             // 
@@ -133,12 +131,13 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(512, 279);
+            this.button1.Enabled = false;
+            this.button1.Location = new System.Drawing.Point(491, 254);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(134, 38);
+            this.button1.Size = new System.Drawing.Size(171, 72);
             this.button1.TabIndex = 22;
-            this.button1.Text = "Set Relay";
+            this.button1.Text = "Set Reference\r\nImpedance\r\n";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -462,43 +461,25 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // toolStripStatusLabel1
+            // measurementValueLabel
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Padding = new System.Windows.Forms.Padding(1173, 0, 0, 0);
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(1411, 32);
-            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // toolStripStatusLabel2
-            // 
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(238, 32);
-            this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
-            this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 1004);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 14, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(694, 42);
-            this.statusStrip1.SizingGrip = false;
-            this.statusStrip1.TabIndex = 23;
-            this.statusStrip1.Text = "statusStrip1";
+            this.measurementValueLabel.AutoSize = true;
+            this.measurementValueLabel.Font = new System.Drawing.Font("Lucida Console", 19.875F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.measurementValueLabel.Location = new System.Drawing.Point(17, 656);
+            this.measurementValueLabel.Name = "measurementValueLabel";
+            this.measurementValueLabel.Size = new System.Drawing.Size(480, 53);
+            this.measurementValueLabel.TabIndex = 23;
+            this.measurementValueLabel.Text = "Impedance: 0∠0";
             // 
             // ComplexImpedanceAnalyser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(694, 1046);
+            this.ClientSize = new System.Drawing.Size(694, 1106);
+            this.Controls.Add(this.measurementValueLabel);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.gbPortSettings);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "ComplexImpedanceAnalyser";
             this.Text = "Complex Impedance Analyser";
@@ -509,8 +490,6 @@
             this.tabControl1.ResumeLayout(false);
             this.ImpedanceGraphTab.ResumeLayout(false);
             this.DebugTab.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -543,12 +522,10 @@
         private System.Windows.Forms.TabPage ImpedanceGraphTab;
         private System.Windows.Forms.TabPage DebugTab;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
-        private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ComboBox ToggleRelayBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label measurementValueLabel;
     }
 }
 
