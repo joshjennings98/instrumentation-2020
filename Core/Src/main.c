@@ -256,7 +256,7 @@ int main(void)
 		  uartTxBytes[3] = sysCount;
 		  uint8_t checksum = makeCheckSum();
 		  uartTxBytes[11] = checksum;
-		  //HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBytes, 12, 1);
+		  HAL_UART_Transmit_IT(&huart2, (uint8_t *)uartTxBytes, 12);
 	  }
 
 
@@ -638,8 +638,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, FB_SW3_Pin|FB_SW1_Pin|FB_SW2_Pin|PGA_CS_Pin 
-                          |FB_SW5_Pin|FB_SW6_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, FB_SW3_Pin|FB_SW2_Pin|FB_SW1_Pin|PGA_CS_Pin 
+                          |FB_SW6_Pin|FB_SW5_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, RED_LED_Pin|GRN_LED_Pin|FB_SW4_Pin, GPIO_PIN_RESET);
@@ -647,10 +647,10 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(AD9833_CS_GPIO_Port, AD9833_CS_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : FB_SW3_Pin FB_SW1_Pin FB_SW2_Pin PGA_CS_Pin 
-                           FB_SW5_Pin FB_SW6_Pin */
-  GPIO_InitStruct.Pin = FB_SW3_Pin|FB_SW1_Pin|FB_SW2_Pin|PGA_CS_Pin 
-                          |FB_SW5_Pin|FB_SW6_Pin;
+  /*Configure GPIO pins : FB_SW3_Pin FB_SW2_Pin FB_SW1_Pin PGA_CS_Pin 
+                           FB_SW6_Pin FB_SW5_Pin */
+  GPIO_InitStruct.Pin = FB_SW3_Pin|FB_SW2_Pin|FB_SW1_Pin|PGA_CS_Pin 
+                          |FB_SW6_Pin|FB_SW5_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -689,7 +689,7 @@ uint32_t measureImpedancePhase(void) {
 	double period = 1.0 / (double)freq;
 
 	double periodTicks = (period * 180000000);
-	double count = (double) counterDifference;
+	double count = counterDifference;
 	uint32_t phase = (uint32_t)(360.0 * count / periodTicks);
 
 	return phase;
@@ -711,7 +711,7 @@ void sendImpedanceMessage(uint32_t mag, uint32_t phase) {
 
 	uint8_t checksum = makeCheckSum();
 	uartTxBytes[11] = checksum;
-	HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBytes, 12, 1);
+	HAL_UART_Transmit_IT(&huart2, (uint8_t *)uartTxBytes, 12);
 	measureFlag = false;
 }
 
@@ -720,6 +720,7 @@ void toggleRelay(uint8_t relay) {
 		{
 		case(0x01):
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_SET);
+				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 		  	  	HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 		  	  	HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
@@ -728,6 +729,7 @@ void toggleRelay(uint8_t relay) {
 				break;
 		case(0x02):
 				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_SET);
+				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
@@ -736,6 +738,7 @@ void toggleRelay(uint8_t relay) {
 				break;
 		case(0x03):
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_SET);
+				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
@@ -744,6 +747,7 @@ void toggleRelay(uint8_t relay) {
 				break;
 		case(0x04):
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_SET);
+				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
@@ -752,6 +756,7 @@ void toggleRelay(uint8_t relay) {
 				break;
 		case(0x05):
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_SET);
+				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
@@ -760,6 +765,7 @@ void toggleRelay(uint8_t relay) {
 				break;
 		case(0x06):
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_SET);
+				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_RESET);
@@ -799,6 +805,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	  // Set flags
 	  startedCounting = 0;
 	  newCaptureValue = true;
+
+	  //TIM2->CNT = 0;
     }
   }
 }
@@ -835,6 +843,7 @@ void UART_Rx_Handler(void)
 			break;
 	case(0x02):
 			measureFlag = true;
+			break;
 	case(0x04): // frequency change message
 			freq = uartRxBytes[6] | ((int)uartRxBytes[5] << 8) | ((int)uartRxBytes[4] << 16) | ((int)uartRxBytes[3] << 24);
 			signal = uartRxBytes[10] | ((int)uartRxBytes[9] << 8) | ((int)uartRxBytes[8] << 16) | ((int)uartRxBytes[7] << 24);
@@ -846,8 +855,10 @@ void UART_Rx_Handler(void)
 	case(0x05): // set PGA gain message
 			pgaGainValue = uartRxBytes[3];
 			updatePGAGainFlag = true;
+			break;
 	case(0x06): // toggle relay
 			toggleRelay(uartRxBytes[3]);
+			break;
 	default:
 		break;
 	}
