@@ -190,6 +190,8 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim2);
 
+
+
   // Set relays low
 
   HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
@@ -659,6 +661,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(AD9833_CS_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
@@ -766,17 +775,6 @@ void toggleRelay(uint8_t relay) {
 		}
 }
 
-void EXTI0_IRQHandler(void)
-{
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
-	TIM2->CNT = 0;
-}
-
-void EXTI1_IRQHandler(void)
-{
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
-	counterDifference = TIM2->CNT;
-}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -785,6 +783,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	// Stage Rx of Next UART Message
 	HAL_UART_Receive_IT(&huart2, (uint8_t*)uartRxBytes, 12);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == 0)
+		TIM2->CNT = 0;
+	else if(GPIO_Pin == 1)
+		counterDifference = TIM2->CNT;
 }
 
 void UART_Rx_Handler(void)
