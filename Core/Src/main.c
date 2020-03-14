@@ -80,6 +80,7 @@ long refSignalFrequency = 0;
 
 float firADC;
 uint16_t rawADC;
+uint32_t maxADC = 0;
 
 uint32_t impedanceMag = 0;
 uint32_t impedancePhase = 0;
@@ -215,6 +216,10 @@ int main(void)
 	  TIM3->CNT = 0;
 	  // Start loop timer
 
+	  if (adc_buf[0][0] > maxADC) {
+		  maxADC = adc_buf[0][0];
+	  }
+
 	  if (newCaptureValue){
 		 newCaptureValue = false;
 	  }
@@ -347,7 +352,7 @@ static void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
@@ -680,13 +685,14 @@ uint32_t measureImpedanceMagnitude(void) {
 	adcMean /= (float)ADC_BUF_LEN;
 
 	return (uint32_t)adcMean;
+	//return maxADC;
 }
 
 uint32_t measureImpedancePhase(void) {
-	int freq = refSignalFrequency;
+	int freq = (int)refSignalFrequency;
 	double period = 1.0 / (double)freq;
 
-	double periodTicks = (period * 180000000);
+	double periodTicks = (period * 90000000);
 	double count = counterDifference;
 	uint32_t phase = (uint32_t)(360.0 * count / periodTicks);
 
@@ -804,6 +810,7 @@ void UART_Rx_Handler(void)
 
 	// Data is valid so handle it
 
+	maxADC = 0;
 	int freq = 0;
 	int signal = 0;
 	// Switch on Data ID
