@@ -339,7 +339,7 @@ namespace Instrumentation2020
 
             if (!noCOMsFlag)
             {
-                portNameBox.SelectedIndex = 0;
+                //portNameBox.SelectedIndex = 0;
             } else
             {
                 rtfTerminal.Text += "No COM ports available.\n";
