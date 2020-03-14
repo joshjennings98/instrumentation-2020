@@ -437,7 +437,7 @@ namespace Instrumentation2020
                 {
 
                     magnitude = BitConverter.ToInt32(_serialRxBuffer.Skip(3).Take(4).ToArray(), 0);
-                    phase = BitConverter.ToInt32(_serialRxBuffer.Skip(7).Take(4).ToArray(), 0);
+                    phase = BitConverter.ToInt32(_serialRxBuffer.Skip(7).Take(4).ToArray(), 0) - 180;
                     receivedMeasureFlag = true;
                 }
             }
@@ -566,12 +566,12 @@ namespace Instrumentation2020
             //myPane.YAxis.MajorGrid.IsVisible = true;
 
             myPane.XAxis.Scale.Min = 0;
-            myPane.XAxis.Scale.Max = 100;
-            myPane.XAxis.Scale.MajorStep = 10;
+            myPane.XAxis.Scale.Max = 15;
+            myPane.XAxis.Scale.MajorStep = 3;
 
             myPane.YAxis.Scale.Min = 0;
-            myPane.YAxis.Scale.Max = 100;
-            myPane.YAxis.Scale.MajorStep = 10;
+            myPane.YAxis.Scale.Max = 15;
+            myPane.YAxis.Scale.MajorStep = 3;
 
             myPane.YAxis.MajorGrid.IsZeroLine = true;
             myPane.XAxis.MajorGrid.IsZeroLine = true;
@@ -601,7 +601,8 @@ namespace Instrumentation2020
                 MethodInvoker mi = delegate () {
                     //updateGraph(zedGraphControl1, (double)(Control.MousePosition.X) / Screen.PrimaryScreen.Bounds.Width, (double)(Screen.PrimaryScreen.Bounds.Height - Control.MousePosition.Y) / Screen.PrimaryScreen.Bounds.Height);
                     double phaseRad = phase * Math.PI / 180.0;
-                    updateGraph(zedGraphControl1, magnitude * Math.Cos(phaseRad), magnitude * Math.Sin(phaseRad));
+                    float measuredMag = (1530 / 330) * (float)magnitude / 4096;
+                    updateGraph(zedGraphControl1, measuredMag * Math.Cos(phaseRad), measuredMag * Math.Sin(phaseRad));
                 };
                 this.Invoke(mi);
             }
@@ -633,7 +634,8 @@ namespace Instrumentation2020
             float impMag = refResistance * measuredMag / vRef;
 
             //measurementValueLabel.Text = "Impedance: " + impMag + "∠" + phase;
-            measurementValueLabel.Text = "Impedance: " + measuredMag + "∠" + phase;
+            double phaseRad = phase * Math.PI / 180.0;
+            measurementValueLabel.Text = "Z: " + measuredMag.ToString("0.##") + "∠" + phase + "\n(" + (measuredMag * Math.Sin(phaseRad)).ToString("0.##") + "+" + (measuredMag * Math.Sin(phaseRad)).ToString("0.##") + "j";
         }
 
         private void timer1_Tick(object sender, EventArgs e)
