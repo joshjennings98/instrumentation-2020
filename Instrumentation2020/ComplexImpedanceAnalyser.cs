@@ -93,6 +93,8 @@ namespace Instrumentation2020
         private int magnitude = 0;
         private int phase = 0;
         private bool receivedMeasureFlag = false;
+        private int refResistance = 10;
+        private float vRef = 0;
 
         public ComplexImpedanceAnalyser()
         {
@@ -625,6 +627,15 @@ namespace Instrumentation2020
             }
         }
 
+        private void calcImpedance()
+        {
+            float measuredMag = 15 * (float) magnitude / 4096;
+            float impMag = refResistance * measuredMag / vRef;
+
+            //measurementValueLabel.Text = "Impedance: " + impMag + "∠" + phase;
+            measurementValueLabel.Text = "Impedance: " + measuredMag + "∠" + phase;
+        }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (statusFlag != 0x00)
@@ -642,7 +653,7 @@ namespace Instrumentation2020
             {
                 rtfTerminal.Text += "Magnitude: " + magnitude + ".\n";
                 rtfTerminal.Text += "Phase: " + phase + ".\n";
-                measurementValueLabel.Text = "Impedance: " + magnitude + "∠" + phase;
+                calcImpedance();
                 receivedMeasureFlag = false;
                 Measure.Enabled = true;
             }
@@ -665,26 +676,32 @@ namespace Instrumentation2020
             if (ToggleRelayBox.Text == "1M")
             {
                 toggleRelayValue = 0x01;
+                refResistance = 1000000;
             }
             else if (ToggleRelayBox.Text == "100k")
             {
                 toggleRelayValue = 0x02;
+                refResistance = 100000;
             }
             else if (ToggleRelayBox.Text == "10k")
             {
                 toggleRelayValue = 0x03;
+                refResistance = 10000;
             }
             else if (ToggleRelayBox.Text == "1k")
             {
                 toggleRelayValue = 0x04;
+                refResistance = 1000;
             }
             else if (ToggleRelayBox.Text == "100")
             {
                 toggleRelayValue = 0x05;
+                refResistance = 100;
             }
             else if (ToggleRelayBox.Text == "10")
             {
                 toggleRelayValue = 0x06;
+                refResistance = 10;
             }
             rtfTerminal.Text += "Selected relay set to " + toggleRelayValue + ".\n";
         }
