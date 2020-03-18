@@ -34,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC_BUF_LEN 10
+#define ADC_BUF_LEN 200
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -82,8 +82,12 @@ float firADC;
 uint16_t rawADC;
 uint32_t maxADC = 0;
 
-uint32_t impedanceMag = 0;
-uint32_t impedancePhase = 0;
+bool autoMode = false;
+
+uint16_t impedanceMag = 0;
+uint16_t impedancePhase = 0;
+uint16_t refVoltageMag = 0;
+uint8_t refImpedance = 0x00;
 
 // ADC stuff
 ADC_HandleTypeDef hadc1;
@@ -112,10 +116,12 @@ void AD9833_Set_Output(void);
 void PGA_Set_Gain(void);
 bool CalculateRxDataChecksum(void);
 uint8_t makeCheckSum(void);
-uint32_t measureImpedanceMagnitude(void);
-uint32_t measureImpedancePhase(void);
-void sendImpedanceMessage(uint32_t mag, uint32_t phase);
+uint16_t measureImpedanceMagnitude(void);
+uint16_t measureRefVoltageMagnitude(void);
+uint16_t measureImpedancePhase(void);
+void sendImpedanceMessage(uint16_t mag, uint16_t phase, uint16_t refVoltage, uint8_t refImpedance);
 void toggleRelay(uint8_t relay);
+float calculateADCMean(void);
 
 /* USER CODE END PFP */
 
@@ -216,10 +222,6 @@ int main(void)
 	  TIM3->CNT = 0;
 	  // Start loop timer
 
-	  if (adc_buf[0][0] > maxADC) {
-		  maxADC = adc_buf[0][0];
-	  }
-
 	  if (newCaptureValue){
 		 newCaptureValue = false;
 	  }
@@ -241,7 +243,8 @@ int main(void)
 		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
 		  impedanceMag = measureImpedanceMagnitude();
 		  impedancePhase = measureImpedancePhase();
-		  sendImpedanceMessage(impedanceMag, impedancePhase);
+		  refVoltageMag = measureRefVoltageMagnitude();
+		  sendImpedanceMessage(impedanceMag, impedancePhase, refVoltageMag, refImpedance);
 		  measureFlag = false;
 	  }
 
@@ -677,41 +680,100 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-uint32_t measureImpedanceMagnitude(void) {
+float calculateADCMean(void) {
 	float adcMean = 0;
 	for (int i = 0; i < ADC_BUF_LEN; i++) {
 	  adcMean += adc_buf[i][0];
 	}
 	adcMean /= (float)ADC_BUF_LEN;
-
-	return (uint32_t)adcMean;
-	//return maxADC;
+	return adcMean;
 }
 
-uint32_t measureImpedancePhase(void) {
+uint16_t measureImpedanceMagnitude(void) {
+	int prevVal = 4096;
+	float adcMean = calculateADCMean();
+	if (autoMode) {
+		int i = 1;
+		while (i < 7) {
+			switch(i){
+				case 1 :
+					toggleRelay(0x01);
+					break;
+				case 2 :
+					toggleRelay(0x02);
+					break;
+				case 3 :
+					toggleRelay(0x03);
+					break;
+				case 4 :
+					toggleRelay(0x04);
+					break;
+				case 5:
+					toggleRelay(0x05);
+					break;
+				case 6:
+					toggleRelay(0x06);
+					break;
+				default:
+					break;
+			}
+			HAL_Delay(10);
+			adcMean = calculateADCMean();
+			i++;
+
+			if (adcMean < prevVal) {
+				i = 1000;
+			}
+			prevVal = adcMean;
+		}
+
+		if (i != 1000) {
+			uint8_t message[12] = {0xFF, 0x09, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00};
+			uint8_t checksum = makeCheckSum();
+			uartTxBytes[11] = checksum;
+			HAL_UART_Transmit_IT(&huart2, (uint8_t *)message, 12);
+
+		}
+	}
+
+	return (uint16_t)adcMean;
+}
+
+uint16_t measureRefVoltageMagnitude(void) {
+	float refMean = 0;
+	for (int i = 0; i < ADC_BUF_LEN; i++) {
+	  refMean += adc_buf[i][1];
+	}
+	refMean /= (float)ADC_BUF_LEN;
+
+	return (uint16_t)refMean;
+}
+
+uint16_t measureImpedancePhase(void) {
 	int freq = (int)refSignalFrequency;
 	double period = 1.0 / (double)freq;
 
 	double periodTicks = (period * 90000000);
 	double count = counterDifference;
-	uint32_t phase = (uint32_t)(360.0 * count / periodTicks);
+	uint16_t phase = (uint16_t)(360.0 * count / periodTicks);
 
 	return phase;
 }
 
-void sendImpedanceMessage(uint32_t mag, uint32_t phase) {
+void sendImpedanceMessage(uint16_t mag, uint16_t phase, uint16_t refVoltage, uint8_t refImpedance) {
 	uartTxBytes[1] = 0x03;
 
-
 	uartTxBytes[3] = mag & 0xFF;
-	uartTxBytes[4] = (mag & 0xFF00) / 0xFF;
-	uartTxBytes[5] = (mag & 0xFF0000) / 0xFFFF;
-	uartTxBytes[6] = (mag & 0xFF000000) / 0xFFFFFF;
+	uartTxBytes[4] = mag >> 8;
+
+	uartTxBytes[5] = refVoltage & 0xFF;
+	uartTxBytes[6] = refVoltage >> 8;
 
 	uartTxBytes[7] = phase & 0xFF;
-	uartTxBytes[8] = (phase & 0xFF00) / 0xFF;
-	uartTxBytes[9] = (phase & 0xFF0000) / 0xFFFF;
-	uartTxBytes[10] = (phase & 0xFF000000) / 0xFFFFFF;
+	uartTxBytes[8] = phase >> 8;
+
+	uartTxBytes[9] = refImpedance;
+	uartTxBytes[10] = 0x00;
 
 	uint8_t checksum = makeCheckSum();
 	uartTxBytes[11] = checksum;
@@ -723,6 +785,7 @@ void toggleRelay(uint8_t relay) {
 	switch(relay)
 		{
 		case(0x01):
+				refImpedance = 0x01;
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_SET);
 				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
@@ -732,6 +795,7 @@ void toggleRelay(uint8_t relay) {
 		  	  	HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x02):
+				refImpedance = 0x02;
 				HAL_GPIO_WritePin(FB_SW2_GPIO_Port, FB_SW2_Pin, GPIO_PIN_SET);
 				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
@@ -741,6 +805,7 @@ void toggleRelay(uint8_t relay) {
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x03):
+				refImpedance = 0x03;
 				HAL_GPIO_WritePin(FB_SW3_GPIO_Port, FB_SW3_Pin, GPIO_PIN_SET);
 				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
@@ -750,6 +815,7 @@ void toggleRelay(uint8_t relay) {
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x04):
+				refImpedance = 0x04;
 				HAL_GPIO_WritePin(FB_SW4_GPIO_Port, FB_SW4_Pin, GPIO_PIN_SET);
 				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
@@ -759,6 +825,7 @@ void toggleRelay(uint8_t relay) {
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x05):
+				refImpedance = 0x05;
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_SET);
 				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_RESET);
@@ -768,6 +835,7 @@ void toggleRelay(uint8_t relay) {
 				HAL_GPIO_WritePin(FB_SW1_GPIO_Port, FB_SW1_Pin, GPIO_PIN_RESET);
 				break;
 		case(0x06):
+				refImpedance = 0x06;
 				HAL_GPIO_WritePin(FB_SW6_GPIO_Port, FB_SW6_Pin, GPIO_PIN_SET);
 				//HAL_Delay(10);
 				HAL_GPIO_WritePin(FB_SW5_GPIO_Port, FB_SW5_Pin, GPIO_PIN_RESET);
@@ -837,6 +905,12 @@ void UART_Rx_Handler(void)
 			break;
 	case(0x06): // toggle relay
 			toggleRelay(uartRxBytes[3]);
+			break;
+	case(0x07): // set autoMode
+			autoMode = false;
+			break;
+	case(0x08): // reset autoMode
+			autoMode = true;
 			break;
 	default:
 		break;
