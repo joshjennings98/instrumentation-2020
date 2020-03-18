@@ -91,10 +91,17 @@ namespace Instrumentation2020
         private byte statusFlag = 0x00;
         private int timeoutA = 0;
         private int magnitude = 0;
+        private int refVoltage = 1;
+        private int refImpedance = 0;
         private int phase = 0;
         private bool receivedMeasureFlag = false;
+        private bool autoMode = false;
         private int refResistance = 10;
         private float vRef = 0;
+        private bool failedAutoRange = false;
+        private bool mode = true;
+        private bool type = true;
+        private bool QD = false;
 
         public ComplexImpedanceAnalyser()
         {
@@ -119,13 +126,16 @@ namespace Instrumentation2020
             PGAGainBox.SelectedIndex = 0;
             ToggleRelayBox.SelectedIndex = 0;
 
+            changeLables();
+
             rtfTerminal.Clear();
 
             InitGraph(zedGraphControl1);
 
             // Get list of ports available and put into list
             List<string> ports = new List<string>();
-            foreach (string s in SerialPort.GetPortNames()) {
+            foreach (string s in SerialPort.GetPortNames())
+            {
                 ports.Add(s);
             };
 
@@ -147,9 +157,10 @@ namespace Instrumentation2020
 
         private void changePort()
         {
-            
+
             // Make a new serial port object with the new baud rate
-            if (baudRateBox.Text != "" && !noCOMsFlag) {
+            if (baudRateBox.Text != "" && !noCOMsFlag)
+            {
                 _serialPort = new SerialPort(portNameBox.Text, Int32.Parse(baudRateBox.Text));
             }
             else if (!noCOMsFlag)
@@ -161,13 +172,13 @@ namespace Instrumentation2020
         private byte[] checksum(byte[] data)
         {
             byte checksum = 0x00;
-            
+
             foreach (var b in data)
             {
                 checksum ^= b;
             }
 
-            return new byte[] {checksum};
+            return new byte[] { checksum };
         }
 
         private static byte[] CombineByteArrays(byte[][] arrays)
@@ -186,7 +197,7 @@ namespace Instrumentation2020
 
         private byte[] formPGAGainMessage()
         {
-            
+
             byte[] id = { 0xFF, 0x05, 0x08 };
             byte[] gain = { BitConverter.GetBytes(PGAGainValue)[0] };
             byte[] empty = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -202,24 +213,24 @@ namespace Instrumentation2020
 
         private byte[] formFreqMessage()
         {
-            byte[] waveform = {0x00, 0x00, 0x20, 0x00};
-       
+            byte[] waveform = { 0x00, 0x00, 0x20, 0x00 };
+
             switch (currentWaveform)
             {
                 case "Square wave":
-                    waveform = new byte[] {0x00, 0x00, 0x20, 0x28};
+                    waveform = new byte[] { 0x00, 0x00, 0x20, 0x28 };
                     break;
                 case "Triangle wave":
-                    waveform = new byte[] {0x00, 0x00, 0x20, 0x02};
+                    waveform = new byte[] { 0x00, 0x00, 0x20, 0x02 };
                     break;
                 case "Sine wave":
-                    waveform = new byte[] {0x00, 0x00, 0x20, 0x00};
+                    waveform = new byte[] { 0x00, 0x00, 0x20, 0x00 };
                     break;
             }
-            byte[] id = {0xFF, 0x04, 0x08};
+            byte[] id = { 0xFF, 0x04, 0x08 };
             byte[] frequency = BitConverter.GetBytes(currentFreq);
             Array.Reverse(frequency);
-            byte[] data = CombineByteArrays(new [] { id, frequency, waveform});//"FF0408" + frequency + waveform;
+            byte[] data = CombineByteArrays(new[] { id, frequency, waveform });//"FF0408" + frequency + waveform;
             byte[] message = CombineByteArrays(new[] { data, checksum(data) });
 
             //string x = BitConverter.ToString(message);
@@ -232,7 +243,7 @@ namespace Instrumentation2020
         {
             changePort();
         }
-        
+
         private void cmbBaudRate_SelectedIndexChanged(object sender, EventArgs e)
         {
             changePort();
@@ -258,7 +269,7 @@ namespace Instrumentation2020
         private byte[] formSendMeasureMessage()
         {
 
-            byte[] id = { 0xFF, 0x02};
+            byte[] id = { 0xFF, 0x02 };
             byte[] empty = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
             byte[] data = CombineByteArrays(new[] { id, empty });
@@ -298,7 +309,7 @@ namespace Instrumentation2020
         {
 
             byte[] id = { 0xFF, 0x06 };
-            byte[] empty = { 0x08, toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            byte[] empty = { 0x08, toggleRelayValue, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
             byte[] data = CombineByteArrays(new[] { id, empty });
             byte[] message = CombineByteArrays(new[] { data, checksum(data) });
@@ -307,7 +318,7 @@ namespace Instrumentation2020
         }
 
         private void changeRelay()
-        {           
+        {
 
             byte[] message = formRelayMessage();
 
@@ -340,7 +351,8 @@ namespace Instrumentation2020
             if (!noCOMsFlag)
             {
                 //portNameBox.SelectedIndex = 0;
-            } else
+            }
+            else
             {
                 rtfTerminal.Text += "No COM ports available.\n";
             }
@@ -357,7 +369,7 @@ namespace Instrumentation2020
             magnitude = 0;
             phase = 0;
             Measure.Enabled = true;
-    }
+        }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
@@ -373,14 +385,14 @@ namespace Instrumentation2020
                     baudRateBox.Enabled = false;
                     Measure.Enabled = true;
                     portNameBox.Enabled = false;
-                    PGAGainBox.Enabled = true;
-                    SETPGAGAINButton.Enabled = true;
                     freqInput.Enabled = true;
                     freqencySetButton.Enabled = true;
                     Measure.Enabled = true;
                     timeoutBox.Enabled = true;
                     waveformbox.Enabled = true;
                     resetbutton.Enabled = true;
+
+                    autoRangeButton.Enabled = true;
 
                     button1.Enabled = true;
                     ToggleRelayBox.Enabled = true;
@@ -395,7 +407,8 @@ namespace Instrumentation2020
                 {
                     rtfTerminal.Text += "Cannot connect, no COM ports available.\n";
                 }
-            } else if (connectBool == true)
+            }
+            else if (connectBool == true)
             {
                 disconnectSerialStuff();
                 connectBool = false;
@@ -409,7 +422,7 @@ namespace Instrumentation2020
             {
                 header = (byte)_serialPort.ReadByte();
             } while (header != 0xFF && _serialPort.BytesToRead > 0);
-            
+
 
             if (header == 0xFF)
             {
@@ -428,22 +441,52 @@ namespace Instrumentation2020
                 _serialRxBuffer = buffer;
                 // Set a message recieved flag
                 _serialDataRxFlag = true;
-               
+
                 if (_serialRxBuffer[1] == 0x01)
                 {
                     statusFlag = _serialRxBuffer[3];
                 }
                 if (_serialRxBuffer[1] == 0x03)
                 {
-
-                    magnitude = BitConverter.ToInt32(_serialRxBuffer.Skip(3).Take(4).ToArray(), 0);
-                    phase = BitConverter.ToInt32(_serialRxBuffer.Skip(7).Take(4).ToArray(), 0) - 180;
+                    magnitude = _serialRxBuffer[3] | (_serialRxBuffer[4] << 8);
+                    refVoltage = _serialRxBuffer[5] | (_serialRxBuffer[6] << 8);
+                    phase = (_serialRxBuffer[7] | (_serialRxBuffer[8] << 8)) - 180;
+                    //refVoltage = BitConverter.ToInt32(_serialRxBuffer.Skip(5).Take(2).ToArray(), 0);
+                    //phase = BitConverter.ToInt32(_serialRxBuffer.Skip(7).Take(2).ToArray(), 0) - 180;
+                    switch (_serialRxBuffer[9])
+                    {
+                        case 0x01:
+                            refImpedance = 1000000;
+                            break;
+                        case 0x02:
+                            refImpedance = 100000;
+                            break;
+                        case 0x03:
+                            refImpedance = 10000;
+                            break;
+                        case 0x04:
+                            refImpedance = 1000;
+                            break;
+                        case 0x05:
+                            refImpedance = 100;
+                            break;
+                        case 0x06:
+                            refImpedance = 10;
+                            break;
+                        default:
+                            break;
+                    }
                     receivedMeasureFlag = true;
+                }
+                if (_serialRxBuffer[1] == 0x09)
+                {
+                    failedAutoRange = true;
                 }
             }
 
-            else {
-               // _serialPort.DiscardInBuffer();
+            else
+            {
+                // _serialPort.DiscardInBuffer();
             };
         }
 
@@ -455,7 +498,8 @@ namespace Instrumentation2020
             }
         }
 
-        private void setPGAGain() {
+        private void setPGAGain()
+        {
             if (!_serialPort.IsOpen)
             {
                 rtfTerminal.Text += "Serial port not open.\n";
@@ -531,8 +575,6 @@ namespace Instrumentation2020
             Measure.Enabled = false;
             ConnectBtn.Text = "Connect";
             portNameBox.Enabled = true;
-            PGAGainBox.Enabled = false;
-            SETPGAGAINButton.Enabled = false;
             freqInput.Enabled = false;
             freqencySetButton.Enabled = false;
             Measure.Enabled = false;
@@ -541,6 +583,7 @@ namespace Instrumentation2020
             resetbutton.Enabled = false;
             button1.Enabled = false;
             ToggleRelayBox.Enabled = false;
+            autoRangeButton.Enabled = false;
         }
 
         private void PGAGainBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -565,13 +608,13 @@ namespace Instrumentation2020
             //myPane.XAxis.MajorGrid.IsVisible = true;
             //myPane.YAxis.MajorGrid.IsVisible = true;
 
-            myPane.XAxis.Scale.Min = 0;
+            myPane.XAxis.Scale.Min = -15;
             myPane.XAxis.Scale.Max = 15;
-            myPane.XAxis.Scale.MajorStep = 3;
+            myPane.XAxis.Scale.MajorStep = 5;
 
-            myPane.YAxis.Scale.Min = 0;
+            myPane.YAxis.Scale.Min = -15;
             myPane.YAxis.Scale.Max = 15;
-            myPane.YAxis.Scale.MajorStep = 3;
+            myPane.YAxis.Scale.MajorStep = 5;
 
             myPane.YAxis.MajorGrid.IsZeroLine = true;
             myPane.XAxis.MajorGrid.IsZeroLine = true;
@@ -593,12 +636,13 @@ namespace Instrumentation2020
 
 
         public void DoThisAllTheTime()
-        {            
+        {
             while (true)
             {
                 //you need to use Invoke because the new thread can't access the UI elements directly
                 Thread.Sleep(10);
-                MethodInvoker mi = delegate () {
+                MethodInvoker mi = delegate ()
+                {
                     //updateGraph(zedGraphControl1, (double)(Control.MousePosition.X) / Screen.PrimaryScreen.Bounds.Width, (double)(Screen.PrimaryScreen.Bounds.Height - Control.MousePosition.Y) / Screen.PrimaryScreen.Bounds.Height);
                     double phaseRad = phase * Math.PI / 180.0;
                     float measuredMag = (1530 / 330) * (float)magnitude / 4096;
@@ -610,14 +654,10 @@ namespace Instrumentation2020
 
         private void ComplexImpedanceAnalyser_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (t.IsAlive) {
+            if (t.IsAlive)
+            {
                 t.Abort();
             }
-        }
-
-        private void toolStripProgressBar1_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void freqInput_KeyPress(object sender, KeyPressEventArgs e)
@@ -630,12 +670,13 @@ namespace Instrumentation2020
 
         private void calcImpedance()
         {
-            float measuredMag = 15 * (float) magnitude / 4096;
-            float impMag = refResistance * measuredMag / vRef;
+            float measuredMag = 15 * (float)magnitude / 4096;
+            float impMag = refImpedance * measuredMag / refVoltage;
 
-            //measurementValueLabel.Text = "Impedance: " + impMag + "∠" + phase;
             double phaseRad = phase * Math.PI / 180.0;
-            measurementValueLabel.Text = "Z: " + measuredMag.ToString("0.##") + "∠" + phase + "\n(" + (measuredMag * Math.Sin(phaseRad)).ToString("0.##") + "+" + (measuredMag * Math.Sin(phaseRad)).ToString("0.##") + "j";
+            measurementValueLabel.Text = "Z: " + impMag.ToString("0.#") + "∠" + phase + "\n   " + (impMag * Math.Cos(phaseRad)).ToString("0.#") + "+" + (impMag * Math.Sin(phaseRad)).ToString("0.#") + "j";
+
+            changeLables();// (Math.PI * phase / 180).ToString("0.##")
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -658,6 +699,13 @@ namespace Instrumentation2020
                 calcImpedance();
                 receivedMeasureFlag = false;
                 Measure.Enabled = true;
+            }
+            if (failedAutoRange)
+            {
+                rtfTerminal.Text += "Auto-Range failed, switching to manual mode.\n";
+                failedAutoRange = false;
+                toggleAutoRange();
+
             }
         }
 
@@ -711,6 +759,187 @@ namespace Instrumentation2020
         private void button1_Click(object sender, EventArgs e)
         {
             changeRelay();
+        }
+
+        private byte[] formSetAutoModeMessage()
+        {
+
+            byte[] id = { 0xFF, 0x07 };
+            byte[] empty = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+            byte[] data = CombineByteArrays(new[] { id, empty });
+            byte[] message = CombineByteArrays(new[] { data, checksum(data) });
+
+            return message;
+        }
+
+        private byte[] formResetAutoModeMessage()
+        {
+
+            byte[] id = { 0xFF, 0x08 };
+            byte[] empty = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+            byte[] data = CombineByteArrays(new[] { id, empty });
+            byte[] message = CombineByteArrays(new[] { data, checksum(data) });
+
+            return message;
+        }
+
+        private void setAutoMode()
+        {
+            if (!_serialPort.IsOpen)
+            {
+                rtfTerminal.Text += "Serial port not open.\n";
+            }
+            else
+            {
+                byte[] message = formSetAutoModeMessage();
+
+                if (autoMode)
+                {
+                    message = formResetAutoModeMessage();
+                }
+
+                rtfTerminal.Text += "Toggling auto mode.\n";
+
+                try
+                {
+                    _serialPort.Write(message, 0, message.Length);
+                }
+
+                catch (Exception ex)
+                {
+                    rtfTerminal.Text += "Toggle auto mode failed! \nError: " + ex.Message + "\n";
+                }
+            }
+        }
+
+        private void toggleAutoRange()
+        {
+            ToggleRelayBox.Enabled = !ToggleRelayBox.Enabled;
+            button1.Enabled = !button1.Enabled;
+            autoMode = !autoMode;
+
+            if (autoMode)
+            {
+                autoRangeButton.Text = "Disable\nAuto\nMode";
+            }
+            else
+            {
+                autoRangeButton.Text = "Enable\nAuto\nMode";
+            }
+
+            setAutoMode();
+        }
+
+        private void autoRangeButton_Click(object sender, EventArgs e)
+        {
+            toggleAutoRange();
+        }
+
+        private void changeLables()
+        {
+            float measuredMag = 15 * (float)magnitude / 4096;
+            float impMag = refImpedance * measuredMag / refVoltage;
+
+            double phaseRad = phase * Math.PI / 180.0;
+            double rs = impMag * Math.Cos(phaseRad);
+            double xs = impMag * Math.Sin(phaseRad);
+
+            if (mode)
+            {
+                label5.Text = "Series Resistance:";
+                rLabel.Text = rs.ToString("0.##");
+            } else
+            {
+                label5.Text = "Parallel Resistance:";
+                rLabel.Text = "Unfinished.";
+            }
+            if (type)
+            {
+                if (mode)
+                {
+                    label6.Text = "Series Capacitance:";
+                    comLabel.Text = (-1 / (2 * Math.PI * currentFreq * xs)).ToString("0.##");
+                }
+                else
+                {
+                    label6.Text = "Parallel Capacitance:";
+                    comLabel.Text = "Unfinished.";
+                }
+            }
+            else
+            {
+                if (mode)
+                {
+                    label6.Text = "Series Inductance:";
+                    comLabel.Text = (xs / (2 * Math.PI * currentFreq)).ToString("0.##");
+                }
+                else
+                {
+                    label6.Text = "Parallel Inductance:";
+                    comLabel.Text = "Unfinished.";
+                }
+            }
+            if (QD)
+            {
+                QDlabel.Text = "Dissipation Factor:";
+                if (xs != 0)
+                {
+                    qdval.Text = (rs / xs).ToString("0.##");
+                }
+                else
+                {
+                    qdval.Text = "0";
+                }
+            }
+            else
+            {
+                QDlabel.Text = "Quality Factor:";
+                if (rs != 0)
+                {
+                    qdval.Text = (xs / rs).ToString("0.##");
+                } else
+                {
+                    qdval.Text = "0";
+                }
+            }
+        }
+
+        private void parallelRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            mode = false;
+            changeLables();
+        }
+
+        private void seriesRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            mode = true;
+            changeLables();
+        }
+
+        private void impedanceRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            type = false;
+            changeLables();
+        }
+
+        private void capacitanceRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            type = true;
+            changeLables();
+        }
+
+        private void qualityFactorRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            QD = false;
+            changeLables();
+        }
+
+        private void dissipationRadioFactorButton_CheckedChanged(object sender, EventArgs e)
+        {
+            QD = true;
+            changeLables();
         }
     }
 }
