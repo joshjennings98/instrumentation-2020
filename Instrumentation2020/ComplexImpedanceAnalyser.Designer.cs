@@ -62,29 +62,29 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.measurementValueLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.parallelRadioButton = new System.Windows.Forms.RadioButton();
-            this.seriesRadioButton = new System.Windows.Forms.RadioButton();
-            this.capacitanceRadioButton = new System.Windows.Forms.RadioButton();
-            this.impedanceRadioButton = new System.Windows.Forms.RadioButton();
-            this.dissipationRadioFactorButton = new System.Windows.Forms.RadioButton();
-            this.qualityFactorRadioButton = new System.Windows.Forms.RadioButton();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.rLabel = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.comLabel = new System.Windows.Forms.Label();
             this.QDlabel = new System.Windows.Forms.Label();
             this.qdval = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.comLabel = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.rLabel = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.capacitanceRadioButton = new System.Windows.Forms.RadioButton();
+            this.impedanceRadioButton = new System.Windows.Forms.RadioButton();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.qualityFactorRadioButton = new System.Windows.Forms.RadioButton();
+            this.dissipationRadioFactorButton = new System.Windows.Forms.RadioButton();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.seriesRadioButton = new System.Windows.Forms.RadioButton();
+            this.parallelRadioButton = new System.Windows.Forms.RadioButton();
             this.gbPortSettings.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.ImpedanceGraphTab.SuspendLayout();
             this.DebugTab.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbPortSettings
@@ -112,7 +112,7 @@
             this.gbPortSettings.Controls.Add(this.baudRateBox);
             this.gbPortSettings.Controls.Add(this.lblComPort);
             this.gbPortSettings.Controls.Add(this.lblBaudRate);
-            this.gbPortSettings.Location = new System.Drawing.Point(20, 539);
+            this.gbPortSettings.Location = new System.Drawing.Point(15, 535);
             this.gbPortSettings.Margin = new System.Windows.Forms.Padding(6);
             this.gbPortSettings.Name = "gbPortSettings";
             this.gbPortSettings.Padding = new System.Windows.Forms.Padding(6);
@@ -124,7 +124,7 @@
             // autoRangeButton
             // 
             this.autoRangeButton.Enabled = false;
-            this.autoRangeButton.Location = new System.Drawing.Point(199, 220);
+            this.autoRangeButton.Location = new System.Drawing.Point(473, 219);
             this.autoRangeButton.Margin = new System.Windows.Forms.Padding(4);
             this.autoRangeButton.Name = "autoRangeButton";
             this.autoRangeButton.Size = new System.Drawing.Size(184, 65);
@@ -167,7 +167,7 @@
             // button1
             // 
             this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(407, 220);
+            this.button1.Location = new System.Drawing.Point(201, 220);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(252, 65);
@@ -483,7 +483,7 @@
             this.DebugTab.Margin = new System.Windows.Forms.Padding(4);
             this.DebugTab.Name = "DebugTab";
             this.DebugTab.Padding = new System.Windows.Forms.Padding(4);
-            this.DebugTab.Size = new System.Drawing.Size(658, 584);
+            this.DebugTab.Size = new System.Drawing.Size(658, 470);
             this.DebugTab.TabIndex = 1;
             this.DebugTab.Text = "Debug";
             this.DebugTab.UseVisualStyleBackColor = true;
@@ -523,29 +523,76 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Impedance Information:";
             // 
-            // parallelRadioButton
+            // QDlabel
             // 
-            this.parallelRadioButton.AutoSize = true;
-            this.parallelRadioButton.Location = new System.Drawing.Point(6, 65);
-            this.parallelRadioButton.Name = "parallelRadioButton";
-            this.parallelRadioButton.Size = new System.Drawing.Size(115, 29);
-            this.parallelRadioButton.TabIndex = 24;
-            this.parallelRadioButton.Text = "Parallel";
-            this.parallelRadioButton.UseVisualStyleBackColor = true;
-            this.parallelRadioButton.CheckedChanged += new System.EventHandler(this.parallelRadioButton_CheckedChanged);
+            this.QDlabel.AutoSize = true;
+            this.QDlabel.Location = new System.Drawing.Point(7, 333);
+            this.QDlabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.QDlabel.Name = "QDlabel";
+            this.QDlabel.Size = new System.Drawing.Size(152, 25);
+            this.QDlabel.TabIndex = 39;
+            this.QDlabel.Text = "Quality Factor:";
             // 
-            // seriesRadioButton
+            // qdval
             // 
-            this.seriesRadioButton.AutoSize = true;
-            this.seriesRadioButton.Checked = true;
-            this.seriesRadioButton.Location = new System.Drawing.Point(6, 30);
-            this.seriesRadioButton.Name = "seriesRadioButton";
-            this.seriesRadioButton.Size = new System.Drawing.Size(104, 29);
-            this.seriesRadioButton.TabIndex = 26;
-            this.seriesRadioButton.TabStop = true;
-            this.seriesRadioButton.Text = "Series";
-            this.seriesRadioButton.UseVisualStyleBackColor = true;
-            this.seriesRadioButton.CheckedChanged += new System.EventHandler(this.seriesRadioButton_CheckedChanged);
+            this.qdval.AutoSize = true;
+            this.qdval.Font = new System.Drawing.Font("Lucida Console", 14.875F, System.Drawing.FontStyle.Bold);
+            this.qdval.Location = new System.Drawing.Point(16, 361);
+            this.qdval.Name = "qdval";
+            this.qdval.Size = new System.Drawing.Size(42, 40);
+            this.qdval.TabIndex = 40;
+            this.qdval.Text = "0";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(7, 250);
+            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(205, 25);
+            this.label6.TabIndex = 37;
+            this.label6.Text = "Series Capacitance:";
+            // 
+            // comLabel
+            // 
+            this.comLabel.AutoSize = true;
+            this.comLabel.Font = new System.Drawing.Font("Lucida Console", 14.875F, System.Drawing.FontStyle.Bold);
+            this.comLabel.Location = new System.Drawing.Point(16, 278);
+            this.comLabel.Name = "comLabel";
+            this.comLabel.Size = new System.Drawing.Size(42, 40);
+            this.comLabel.TabIndex = 38;
+            this.comLabel.Text = "0";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(7, 167);
+            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(192, 25);
+            this.label5.TabIndex = 26;
+            this.label5.Text = "Series Resistance:";
+            // 
+            // rLabel
+            // 
+            this.rLabel.AutoSize = true;
+            this.rLabel.Font = new System.Drawing.Font("Lucida Console", 14.875F, System.Drawing.FontStyle.Bold);
+            this.rLabel.Location = new System.Drawing.Point(16, 195);
+            this.rLabel.Name = "rLabel";
+            this.rLabel.Size = new System.Drawing.Size(42, 40);
+            this.rLabel.TabIndex = 36;
+            this.rLabel.Text = "0";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.capacitanceRadioButton);
+            this.groupBox4.Controls.Add(this.impedanceRadioButton);
+            this.groupBox4.Location = new System.Drawing.Point(6, 410);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(153, 107);
+            this.groupBox4.TabIndex = 34;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Impedance:";
             // 
             // capacitanceRadioButton
             // 
@@ -571,16 +618,16 @@
             this.impedanceRadioButton.UseVisualStyleBackColor = true;
             this.impedanceRadioButton.CheckedChanged += new System.EventHandler(this.impedanceRadioButton_CheckedChanged);
             // 
-            // dissipationRadioFactorButton
+            // groupBox5
             // 
-            this.dissipationRadioFactorButton.AutoSize = true;
-            this.dissipationRadioFactorButton.Location = new System.Drawing.Point(6, 65);
-            this.dissipationRadioFactorButton.Name = "dissipationRadioFactorButton";
-            this.dissipationRadioFactorButton.Size = new System.Drawing.Size(216, 29);
-            this.dissipationRadioFactorButton.TabIndex = 32;
-            this.dissipationRadioFactorButton.Text = "Dissipation Factor";
-            this.dissipationRadioFactorButton.UseVisualStyleBackColor = true;
-            this.dissipationRadioFactorButton.CheckedChanged += new System.EventHandler(this.dissipationRadioFactorButton_CheckedChanged);
+            this.groupBox5.Controls.Add(this.qualityFactorRadioButton);
+            this.groupBox5.Controls.Add(this.dissipationRadioFactorButton);
+            this.groupBox5.Location = new System.Drawing.Point(166, 409);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(218, 108);
+            this.groupBox5.TabIndex = 35;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Q/D Factor:";
             // 
             // qualityFactorRadioButton
             // 
@@ -595,6 +642,17 @@
             this.qualityFactorRadioButton.UseVisualStyleBackColor = true;
             this.qualityFactorRadioButton.CheckedChanged += new System.EventHandler(this.qualityFactorRadioButton_CheckedChanged);
             // 
+            // dissipationRadioFactorButton
+            // 
+            this.dissipationRadioFactorButton.AutoSize = true;
+            this.dissipationRadioFactorButton.Location = new System.Drawing.Point(6, 65);
+            this.dissipationRadioFactorButton.Name = "dissipationRadioFactorButton";
+            this.dissipationRadioFactorButton.Size = new System.Drawing.Size(216, 29);
+            this.dissipationRadioFactorButton.TabIndex = 32;
+            this.dissipationRadioFactorButton.Text = "Dissipation Factor";
+            this.dissipationRadioFactorButton.UseVisualStyleBackColor = true;
+            this.dissipationRadioFactorButton.CheckedChanged += new System.EventHandler(this.dissipationRadioFactorButton_CheckedChanged);
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.seriesRadioButton);
@@ -608,93 +666,35 @@
             this.groupBox3.Text = "Mode:";
             this.groupBox3.Visible = false;
             // 
-            // groupBox4
+            // seriesRadioButton
             // 
-            this.groupBox4.Controls.Add(this.capacitanceRadioButton);
-            this.groupBox4.Controls.Add(this.impedanceRadioButton);
-            this.groupBox4.Location = new System.Drawing.Point(6, 410);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(153, 107);
-            this.groupBox4.TabIndex = 34;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Impedance:";
+            this.seriesRadioButton.AutoSize = true;
+            this.seriesRadioButton.Checked = true;
+            this.seriesRadioButton.Location = new System.Drawing.Point(6, 30);
+            this.seriesRadioButton.Name = "seriesRadioButton";
+            this.seriesRadioButton.Size = new System.Drawing.Size(104, 29);
+            this.seriesRadioButton.TabIndex = 26;
+            this.seriesRadioButton.TabStop = true;
+            this.seriesRadioButton.Text = "Series";
+            this.seriesRadioButton.UseVisualStyleBackColor = true;
+            this.seriesRadioButton.CheckedChanged += new System.EventHandler(this.seriesRadioButton_CheckedChanged);
             // 
-            // groupBox5
+            // parallelRadioButton
             // 
-            this.groupBox5.Controls.Add(this.qualityFactorRadioButton);
-            this.groupBox5.Controls.Add(this.dissipationRadioFactorButton);
-            this.groupBox5.Location = new System.Drawing.Point(166, 409);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(218, 108);
-            this.groupBox5.TabIndex = 35;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Q/D Factor:";
-            // 
-            // rLabel
-            // 
-            this.rLabel.AutoSize = true;
-            this.rLabel.Font = new System.Drawing.Font("Lucida Console", 14.875F, System.Drawing.FontStyle.Bold);
-            this.rLabel.Location = new System.Drawing.Point(16, 195);
-            this.rLabel.Name = "rLabel";
-            this.rLabel.Size = new System.Drawing.Size(42, 40);
-            this.rLabel.TabIndex = 36;
-            this.rLabel.Text = "0";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 167);
-            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(192, 25);
-            this.label5.TabIndex = 26;
-            this.label5.Text = "Series Resistance:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 250);
-            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(205, 25);
-            this.label6.TabIndex = 37;
-            this.label6.Text = "Series Capacitance:";
-            // 
-            // comLabel
-            // 
-            this.comLabel.AutoSize = true;
-            this.comLabel.Font = new System.Drawing.Font("Lucida Console", 14.875F, System.Drawing.FontStyle.Bold);
-            this.comLabel.Location = new System.Drawing.Point(16, 278);
-            this.comLabel.Name = "comLabel";
-            this.comLabel.Size = new System.Drawing.Size(42, 40);
-            this.comLabel.TabIndex = 38;
-            this.comLabel.Text = "0";
-            // 
-            // QDlabel
-            // 
-            this.QDlabel.AutoSize = true;
-            this.QDlabel.Location = new System.Drawing.Point(7, 333);
-            this.QDlabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.QDlabel.Name = "QDlabel";
-            this.QDlabel.Size = new System.Drawing.Size(152, 25);
-            this.QDlabel.TabIndex = 39;
-            this.QDlabel.Text = "Quality Factor:";
-            // 
-            // qdval
-            // 
-            this.qdval.AutoSize = true;
-            this.qdval.Font = new System.Drawing.Font("Lucida Console", 14.875F, System.Drawing.FontStyle.Bold);
-            this.qdval.Location = new System.Drawing.Point(16, 361);
-            this.qdval.Name = "qdval";
-            this.qdval.Size = new System.Drawing.Size(42, 40);
-            this.qdval.TabIndex = 40;
-            this.qdval.Text = "0";
+            this.parallelRadioButton.AutoSize = true;
+            this.parallelRadioButton.Location = new System.Drawing.Point(6, 65);
+            this.parallelRadioButton.Name = "parallelRadioButton";
+            this.parallelRadioButton.Size = new System.Drawing.Size(115, 29);
+            this.parallelRadioButton.TabIndex = 24;
+            this.parallelRadioButton.Text = "Parallel";
+            this.parallelRadioButton.UseVisualStyleBackColor = true;
+            this.parallelRadioButton.CheckedChanged += new System.EventHandler(this.parallelRadioButton_CheckedChanged);
             // 
             // ComplexImpedanceAnalyser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1094, 956);
+            this.ClientSize = new System.Drawing.Size(1094, 839);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.gbPortSettings);
@@ -713,12 +713,12 @@
             this.DebugTab.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
