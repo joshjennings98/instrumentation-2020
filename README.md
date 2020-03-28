@@ -1,2 +1,3 @@
-# instrumentation2020
- Instrumentation 2020
+# Instrumentation Coursework 2020
+
+The coursework done by Josh Jennings and Jack Waller for ELEC96020 - Instrumentation.
