@@ -1,0 +1,2 @@
+ad9833.c:11:6:AD9833CalculateRegister	32	static
+ad9833.c:31:6:AD9833_Read_Output	8	static
